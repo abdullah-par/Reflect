@@ -24,7 +24,6 @@ function App() {
 
   return (
     <>
-      <div className="notebook-margin-line"></div>
       {/* ===== NAVBAR ===== */}
       <nav className="navbar" ref={navRef}>
         <div className="nav-container">
@@ -55,60 +54,106 @@ function App() {
 
       {/* ===== HERO ===== */}
       <section className="hero">
-        <div className="hero-container">
-          <h1 className="animate-up delay-1">
-            Your journal <span className="impasto-gradient">already</span><br />
-            holds the <span className="marker-h marker-blue">answers.</span>
-          </h1>
-          <div className="hero-sticky-note desktop-only animate-up delay-3">
-            âœ¦ Finally, a mirror for your mind. No filters, just the truth.
+        <div className="hero-grid">
+          <div className="hero-text-side">
+            <h1 className="animate-up delay-1">
+              Your journal already<br />
+              holds the answers.
+            </h1>
+            <p className="hero-tagline animate-up delay-2">
+              Reflct reads your entries and surfaces the patterns, emotions, and lessons you keep missing.
+            </p>
+            <div className="hero-cta-group animate-up delay-3">
+              <a href="#cta" className="btn-primary">Start Writing</a>
+              <a href="#how-it-works" className="btn-secondary">See how it works</a>
+            </div>
+            <div className="hero-trust animate-up delay-3">
+              Free to start · Private by default · No credit card
+            </div>
           </div>
-        </div>
-        <p className="hero-tagline animate-up delay-2">
-          Reflct reads your entries and surfaces the patterns, emotions, and lessons you keep missing.
-        </p>
-        <div className="hero-cta-group animate-up delay-3">
-          <a href="#cta" className="btn-primary">Start Writing</a>
-          <a href="#how-it-works" className="btn-secondary">See how it works</a>
-        </div>
-        <div className="hero-trust animate-up delay-3">
-          Free to start Â· Private by default Â· No credit card
+
+          <div className="hero-visual-side">
+            <svg viewBox="0 0 440 320" className="diary-svg" fill="none" xmlns="http://www.w3.org/2000/svg">
+              {/* Stacked Pages behind (Depth) */}
+              <rect x="42" y="62" width="160" height="220" rx="4" className="diary-page-edge" />
+              <rect x="238" y="62" width="160" height="220" rx="4" className="diary-page-edge" />
+              
+              <rect x="46" y="58" width="160" height="220" rx="4" className="diary-page-edge" />
+              <rect x="234" y="58" width="160" height="220" rx="4" className="diary-page-edge" />
+
+              {/* Main Left Page */}
+              <rect x="50" y="50" width="170" height="230" rx="2" className="diary-page" />
+              <line x1="75" y1="85" x2="200" y2="85" className="diary-lines" />
+              <line x1="75" y1="115" x2="200" y2="115" className="diary-lines" />
+              <line x1="75" y1="145" x2="200" y2="145" className="diary-lines" />
+              <line x1="75" y1="175" x2="200" y2="175" className="diary-lines" />
+              <line x1="75" y1="205" x2="200" y2="205" className="diary-lines" />
+              <line x1="75" y1="235" x2="200" y2="235" className="diary-lines" />
+              <line x1="70" y1="65" x2="70" y2="265" className="diary-accent" />
+
+              {/* Main Right Page */}
+              <rect x="220" y="50" width="170" height="230" rx="2" className="diary-page" />
+              <line x1="240" y1="85" x2="365" y2="85" className="diary-lines" />
+              <line x1="240" y1="115" x2="365" y2="115" className="diary-lines" />
+              <line x1="240" y1="145" x2="365" y2="145" className="diary-lines" />
+              <line x1="240" y1="175" x2="365" y2="175" className="diary-lines" />
+              <line x1="240" y1="205" x2="365" y2="205" className="diary-lines" />
+              <line x1="240" y1="235" x2="365" y2="235" className="diary-lines" />
+
+              {/* Binding details */}
+              <line x1="220" y1="70" x2="220" y2="80" className="diary-binding" />
+              <line x1="220" y1="110" x2="220" y2="120" className="diary-binding" />
+              <line x1="220" y1="150" x2="220" y2="160" className="diary-binding" />
+              <line x1="220" y1="190" x2="220" y2="200" className="diary-binding" />
+              <line x1="220" y1="230" x2="220" y2="240" className="diary-binding" />
+
+              {/* Refined Pen (Leaning) */}
+              <g transform="rotate(12 320 160)">
+                {/* Pen Shadow */}
+                <rect x="315" y="85" width="8" height="170" rx="4" className="diary-pen-shadow" />
+                
+                {/* Pen Body */}
+                <rect x="310" y="80" width="10" height="150" rx="1" className="diary-pen-body" />
+                
+                {/* Pen Cap/Top */}
+                <rect x="310" y="80" width="10" height="30" rx="1" className="diary-pen-body" />
+                <rect x="314" y="90" width="2" height="40" className="diary-pen-clip" />
+                
+                {/* Pen Tip */}
+                <path d="M310 230 L315 250 L320 230 Z" className="diary-pen-tip" />
+              </g>
+            </svg>
+          </div>
         </div>
       </section>
 
-      <div className="scribble-divider"></div>
-
       {/* ===== FEATURES ===== */}
       <section className="features-section" id="features">
-        <div className="section-container" style={{ position: 'relative' }}>
+        <div className="section-container">
           <span className="section-label">Core Features</span>
-          <h2 className="section-title">Four ways Reflct <span className="sketch-underline">reads between your lines</span></h2>
-          <div className="annotation desktop-only" style={{ left: '-60px', top: '120px', transform: 'rotate(-10deg)', textAlign: 'right' }}>
-            <p>Built for<br/>clarity</p>
-            <div className="arrow-sketch" style={{ transform: 'rotate(120deg) scaleX(-1)' }}></div>
-          </div>
+          <h2 className="section-title">Four ways Reflct reads between your lines</h2>
           <p className="section-subtitle">
             Not another notes app. This is a mirror that shows you what you can't see yourself.
           </p>
           
           <div className="features-grid">
             <div className="feature-item animate-up">
-              <span className="feature-label">01 â€”</span>
+              <span className="feature-label">01 ·</span>
               <h3>Patterns</h3>
-              <p>AI spots the same struggles showing up across weeks or months â€” the loops you're stuck in without knowing it.</p>
+              <p>AI spots the same struggles showing up across weeks or months — the loops you're stuck in without knowing it.</p>
             </div>
             <div className="feature-item animate-up delay-1">
-              <span className="feature-label">02 â€”</span>
+              <span className="feature-label">02 ·</span>
               <h3>Emotions</h3>
               <p>Detect emotional tone and map how your feelings shift across entries. See the arc of your inner world.</p>
             </div>
             <div className="feature-item animate-up delay-2">
-              <span className="feature-label">03 â€”</span>
+              <span className="feature-label">03 ·</span>
               <h3>Action</h3>
-              <p>Psychology-backed steps â€” not generic advice, but rooted in your words. Real guidance from your real life.</p>
+              <p>Psychology-backed steps — not generic advice, but rooted in your words. Real guidance from your real life.</p>
             </div>
             <div className="feature-item animate-up delay-3">
-              <span className="feature-label">04 â€”</span>
+              <span className="feature-label">04 ·</span>
               <h3>Memory</h3>
               <p>Surfaces entries from months ago that are eerily relevant right now. Your past self, speaking to your present.</p>
             </div>
@@ -120,7 +165,7 @@ function App() {
       <section className="how-it-works-section" id="how-it-works">
         <div className="section-container section-center">
           <span className="section-label">How It Works</span>
-          <h2 className="section-title">Write. Reflect. <span className="marker-h marker-pink">Grow.</span></h2>
+          <h2 className="section-title">Write. Reflect. Grow.</h2>
           <p className="section-subtitle">
             Four simple steps from raw thoughts to actionable self-awareness.
           </p>
@@ -159,11 +204,11 @@ function App() {
           
           <div className="journal-mockup">
             <div className="journal-content-wrap">
-              <span className="journal-ai-status">âœ¦ AI analyzed</span>
+              <span className="journal-ai-status">? AI analyzed</span>
               <span className="journal-date">Monday, June 9, 2026</span>
               <div className="journal-text">
-                I keep saying yes to things I don't want to do. It happened again today at work â€” someone asked me to take on
-                an extra project and I just... agreed. I felt that <span className="marker-h">familiar tightness</span> in my chest. The same thing happened
+                I keep saying yes to things I don't want to do. It happened again today at work — someone asked me to take on
+                an extra project and I just... agreed. I felt that familiar tightness in my chest. The same thing happened
                 last month with the volunteering thing. I think I'm afraid that saying no means people won't like me.
                 But I'm exhausted. Something has to change.
               </div>
@@ -190,7 +235,7 @@ function App() {
       <footer className="footer">
         <div className="footer-container">
           <span className="navbar-logo">Reflct</span>
-          <p className="footer-copyright">Â© 2026 Reflct</p>
+          <p className="footer-copyright">© 2026 Reflct</p>
         </div>
       </footer>
     </>
