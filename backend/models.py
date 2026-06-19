@@ -18,12 +18,25 @@ class JournalEntry(Base):
     __tablename__ = "journal_entries"
 
     id = Column(Integer, primary_key=True, index=True)
+    title = Column(String, nullable=True)  # optional AI-suggested title
     content = Column(Text, index=False)
     created_at = Column(DateTime, default=datetime.datetime.utcnow)
     owner_id = Column(Integer, ForeignKey("users.id"))
 
     owner = relationship("User", back_populates="entries")
     insight = relationship("EntryInsight", back_populates="entry", uselist=False)
+    edits = relationship("JournalEntryEdit", back_populates="entry", cascade="all, delete-orphan")
+
+class JournalEntryEdit(Base):
+    __tablename__ = "journal_entry_edits"
+
+    id = Column(Integer, primary_key=True, index=True)
+    entry_id = Column(Integer, ForeignKey("journal_entries.id"), nullable=False)
+    title = Column(String, nullable=True)
+    content = Column(Text, nullable=False)
+    edited_at = Column(DateTime, default=datetime.datetime.utcnow)
+
+    entry = relationship("JournalEntry", back_populates="edits")
 
 class EntryInsight(Base):
     __tablename__ = "entry_insights"

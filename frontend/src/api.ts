@@ -1,7 +1,7 @@
 export const API_URL = 'http://localhost:8000';
 
 export const fetchWithAuth = async (url: string, options: RequestInit = {}) => {
-  const token = localStorage.getItem('antigravity_token');
+  const token = localStorage.getItem('reflect_token');
   const headers = new Headers(options.headers || {});
   
   if (token) {
@@ -19,7 +19,7 @@ export const fetchWithAuth = async (url: string, options: RequestInit = {}) => {
 
   if (response.status === 401) {
     // Handle unauthorized
-    localStorage.removeItem('antigravity_token');
+    localStorage.removeItem('reflect_token');
     window.location.href = '/auth';
   }
 

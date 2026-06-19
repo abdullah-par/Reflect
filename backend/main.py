@@ -7,6 +7,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 import crud, models, schemas, auth
 from database import SessionLocal, engine
+from typing import List
 
 # Create the database tables
 models.Base.metadata.create_all(bind=engine)
@@ -126,6 +127,24 @@ def read_entries(
 ):
     entries = crud.get_entries(db, user_id=current_user.id, skip=skip, limit=limit)
     return entries
+
+# ----- New Endpoints -----
+
+@app.get("/entries/{entry_id}/edits", response_model=List[schemas.JournalEntryEdit])
+def read_entry_edits(entry_id: int, db: Session = Depends(get_db), current_user: schemas.User = Depends(get_current_user)):
+    entry = db.query(models.JournalEntry).filter(models.JournalEntry.id == entry_id, models.JournalEntry.owner_id == current_user.id).first()
+    if not entry:
+        raise HTTPException(status_code=404, detail="Entry not found")
+    return crud.get_entry_edits(db, entry_id=entry_id)
+
+@app.post("/entries/{entry_id}/suggest-title", response_model=dict)
+def suggest_entry_title(entry_id: int, db: Session = Depends(get_db), current_user: schemas.User = Depends(get_current_user)):
+    entry = crud.get_entry(db, entry_id=entry_id)
+    if not entry or entry.owner_id != current_user.id:
+        raise HTTPException(status_code=404, detail="Entry not found")
+    suggestion = crud.suggest_title(entry.content)
+    return {"suggested_title": suggestion}
+
 
 @app.post("/summaries/generate", response_model=schemas.NarrativeSummary)
 def generate_summary(

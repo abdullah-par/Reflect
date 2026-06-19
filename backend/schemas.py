@@ -35,7 +35,36 @@ class NarrativeSummary(NarrativeSummaryBase):
         from_attributes = True
 
 class JournalEntryBase(BaseModel):
+    title: Optional[str] = None
     content: str
+
+class JournalEntryCreate(JournalEntryBase):
+    pass
+
+class JournalEntry(JournalEntryBase):
+    id: int
+    created_at: datetime.datetime
+    owner_id: int
+    insight: Optional[EntryInsight] = None
+
+    class Config:
+        from_attributes = True
+
+# New schemas for edits
+class JournalEntryEditBase(BaseModel):
+    title: Optional[str] = None
+    content: str
+
+class JournalEntryEditCreate(JournalEntryEditBase):
+    pass
+
+class JournalEntryEdit(JournalEntryEditBase):
+    id: int
+    entry_id: int
+    edited_at: datetime.datetime
+
+    class Config:
+        from_attributes = True
 
 class JournalEntryCreate(JournalEntryBase):
     pass

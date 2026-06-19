@@ -11,6 +11,7 @@ import {
   describeTonePresence,
   describePersonPresence,
 } from './utils/format';
+import HistoryPane from "./HistoryPane.tsx";
 import { useSettings } from './useSettings';
 
 interface Props {
@@ -45,9 +46,37 @@ function SunIcon() {
 export default function Dashboard({ theme, toggleTheme }: Props) {
   const [entries, setEntries] = useState<any[]>([]);
   const [summaries, setSummaries] = useState<any[]>([]);
-  const [activeTab, setActiveTab] = useState<'journal' | 'chapters' | 'mirror' | 'manuscript' | 'settings'>('journal');
+  const [activeTab, setActiveTab] = useState<'journal' | 'chapters' | 'mirror' | 'manuscript' | 'settings' | 'history'>('journal');
   const [selectedEntryId, setSelectedEntryId] = useState<string | null>(null);
-  const { settings, updateSettings } = useSettings();
+  const [suggestedTitle, setSuggestedTitle] = useState<string | null>(null);
+  const [suggesting, setSuggesting] = useState(false);
+
+  const handleSuggestTitle = async () => {
+    if (!selectedEntryId) return;
+    setSuggesting(true);
+    try {
+      const res = await fetchWithAuth(`/entries/${selectedEntryId}/suggest-title`);
+      if (res.ok) {
+        const data = await res.json();
+        setSuggestedTitle(data.suggested_title);
+      } else {
+        console.error('Failed to suggest title');
+      }
+    } catch (err) {
+      console.error('Error suggesting title', err);
+    } finally {
+      setSuggesting(false);
+    }
+  };
+
+  const applySuggestedTitle = () => {
+    // Optionally, you could send an update to backend. For now, just update UI.
+    // Assuming selectedEntry has a title field, we could set it via state.
+    // This placeholder demonstrates UI overwrite.
+    // In a real app, you would call an update endpoint.
+    // Here we just log.
+    console.log('Applying suggested title:', suggestedTitle);
+  };
 
   const [periodStart, setPeriodStart] = useState(() => {
     const d = new Date();
@@ -180,6 +209,12 @@ export default function Dashboard({ theme, toggleTheme }: Props) {
             >
               Settings
             </button>
+            <button
+              onClick={() => setActiveTab('history')}
+              className={`ds-nav-item ${activeTab === 'history' ? 'active' : ''}`}
+            >
+              History
+            </button>
           </nav>
         </div>
 
@@ -231,10 +266,20 @@ export default function Dashboard({ theme, toggleTheme }: Props) {
             ) : selectedEntry ? (
               <article>
                 <div className="ds-entry-header">
+                  {selectedEntry.title && <h2 className="ds-entry-title">{selectedEntry.title}</h2>}
                   <div className="ds-entry-date-large">{formatEntryTime(selectedEntry.created_at)}</div>
                 </div>
                 
                 <div className="ds-entry-text">{selectedEntry.content}</div>
+
+                <button onClick={handleSuggestTitle} disabled={suggesting} className="suggest-title-btn">
+                  {suggesting ? 'Suggesting…' : 'Suggest Title'}
+                </button>
+                {suggestedTitle && (
+                  <div className="suggested-title">
+                    Suggested: <span className="clickable" onClick={applySuggestedTitle}>{suggestedTitle}</span>
+                  </div>
+                )}
 
                 {settings.enableObserverNotes && observerNote && (
                   <div className="observer-note">
@@ -299,47 +344,8 @@ export default function Dashboard({ theme, toggleTheme }: Props) {
             </div>
           )}
 
-          {activeTab === 'mirror' && (
-            <div>
-              <section className="mirror-section">
-                <h2 className="mirror-section-title">What keeps showing up</h2>
-                {Object.keys(patterns).length === 0 ? (
-                  <p className="mirror-empty">Keep writing. Patterns emerge slowly.</p>
-                ) : (
-                  <ul className="mirror-list">
-                    {Object.entries(patterns).map(([name, count]) => (
-                      <li key={name} className="mirror-list-item">{describePatternOccurrence(name, count)}</li>
-                    ))}
-                  </ul>
-                )}
-              </section>
-
-              <section className="mirror-section">
-                <h2 className="mirror-section-title">People and places</h2>
-                {Object.keys(relationships).length === 0 ? (
-                  <p className="mirror-empty">Names and places from your entries will gather here over time.</p>
-                ) : (
-                  <ul className="mirror-list">
-                    {Object.entries(relationships).map(([name, stats]) => (
-                      <li key={name} className="mirror-list-item">{describePersonPresence(name, stats)}</li>
-                    ))}
-                  </ul>
-                )}
-              </section>
-
-              <section className="mirror-section">
-                <h2 className="mirror-section-title">Emotional weather</h2>
-                {Object.keys(toneCounts).length === 0 ? (
-                  <p className="mirror-empty">Your moods will appear here as you write.</p>
-                ) : (
-                  <ul className="mirror-list">
-                    {Object.entries(toneCounts).map(([tone, count]) => (
-                      <li key={tone} className="mirror-list-item">{describeTonePresence(tone, count)}</li>
-                    ))}
-                  </ul>
-                )}
-              </section>
-            </div>
+          {activeTab === 'history' && (
+            <HistoryPane selectedEntryId={selectedEntryId} />
           )}
 
           {activeTab === 'manuscript' && (

@@ -1,0 +1,39 @@
+.history-pane {
+  padding: 1rem;
+}
+.history-title {
+  font-size: 1.25rem;
+  margin-bottom: 0.75rem;
+  color: var(--text);
+}
+.history-list {
+  list-style: none;
+  padding: 0;
+}
+.history-item {
+  background: var(--card-bg);
+  border-radius: var(--radius-sm);
+  padding: 0.8rem;
+  margin-bottom: 0.6rem;
+  box-shadow: var(--shadow-sm);
+  transition: transform 0.2s;
+}
+.history-item:hover {
+  transform: translateY(-2px);
+}
+.edit-meta {
+  font-size: 0.85rem;
+  color: var(--muted);
+  margin-bottom: 0.4rem;
+}
+.edit-content {
+  margin: 0;
+  line-height: 1.4;
+}
+.animate-fade-in {
+  animation: fadeIn 0.3s ease-out;
+}
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}

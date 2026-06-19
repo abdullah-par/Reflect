@@ -89,7 +89,7 @@ export default function Auth({ theme, toggleTheme }: Props) {
 
         if (res.ok) {
           const data = await res.json();
-          localStorage.setItem('antigravity_token', data.access_token);
+          localStorage.setItem('reflect_token', data.access_token);
           navigate('/app');
         } else {
           setError(await parseError(res, 'Could not sign in. Check your details and try again.'));
