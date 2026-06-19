@@ -10,41 +10,56 @@ export default function Auth() {
   const [message, setMessage] = useState<string | null>(null);
   const navigate = useNavigate();
 
+  const parseError = async (res: Response, fallback: string) => {
+    try {
+      const data = await res.json();
+      if (typeof data.detail === 'string') return data.detail;
+      if (Array.isArray(data.detail)) return data.detail.map((d: { msg?: string }) => d.msg).filter(Boolean).join('. ');
+    } catch {
+      /* ignore */
+    }
+    return fallback;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
     setMessage(null);
 
-    if (isLogin) {
-      const formData = new FormData();
-      formData.append('username', email);
-      formData.append('password', password);
+    try {
+      if (isLogin) {
+        const formData = new FormData();
+        formData.append('username', email);
+        formData.append('password', password);
 
-      const res = await fetch(`${API_URL}/token`, {
-        method: 'POST',
-        body: formData,
-      });
+        const res = await fetch(`${API_URL}/token`, {
+          method: 'POST',
+          body: formData,
+        });
 
-      if (res.ok) {
-        const data = await res.json();
-        localStorage.setItem('antigravity_token', data.access_token);
-        navigate('/app');
+        if (res.ok) {
+          const data = await res.json();
+          localStorage.setItem('antigravity_token', data.access_token);
+          navigate('/app');
+        } else {
+          setError(await parseError(res, 'Could not sign in. Check your details and try again.'));
+        }
       } else {
-        setError('Could not sign in. Check your details and try again.');
-      }
-    } else {
-      const res = await fetch(`${API_URL}/register`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }),
-      });
+        const res = await fetch(`${API_URL}/register`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, password }),
+        });
 
-      if (res.ok) {
-        setIsLogin(true);
-        setMessage('Account created. You can sign in now.');
-      } else {
-        setError('Could not create account. Try a different email.');
+        if (res.ok) {
+          setIsLogin(true);
+          setMessage('Account created. You can sign in now.');
+        } else {
+          setError(await parseError(res, 'Could not create account. Try a different email.'));
+        }
       }
+    } catch {
+      setError('Cannot reach the server. Make sure the backend is running on localhost:8000.');
     }
   };
 
