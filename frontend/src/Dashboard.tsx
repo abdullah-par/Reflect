@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { fetchWithAuth, fetchSummaries, generateSummary } from './api';
+import { Theme } from './useTheme';
 import {
   groupEntriesByPeriod,
   formatEntryTime,
@@ -11,7 +12,36 @@ import {
   describePersonPresence,
 } from './utils/format';
 
-export default function Dashboard() {
+interface Props {
+  theme: Theme;
+  toggleTheme: () => void;
+}
+
+function MoonIcon() {
+  return (
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+    </svg>
+  );
+}
+
+function SunIcon() {
+  return (
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="12" r="5" />
+      <line x1="12" y1="1" x2="12" y2="3" />
+      <line x1="12" y1="21" x2="12" y2="23" />
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" />
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78" />
+      <line x1="1" y1="12" x2="3" y2="12" />
+      <line x1="21" y1="12" x2="23" y2="12" />
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" />
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
+    </svg>
+  );
+}
+
+export default function Dashboard({ theme, toggleTheme }: Props) {
   const [entries, setEntries] = useState<any[]>([]);
   const [summaries, setSummaries] = useState<any[]>([]);
   const [activeTab, setActiveTab] = useState<'journal' | 'chapters' | 'mirror'>('journal');
@@ -102,21 +132,32 @@ export default function Dashboard() {
 
   return (
     <div className="app-shell">
-      <header className="app-header">
+      {/* Header */}
+      <header className="app-header animate-up">
         <Link to="/editor" className="app-wordmark">
           Reflect
         </Link>
         <div className="app-header-actions">
           <Link to="/editor" className="quiet-link">
-            write
+            ✦ Write
           </Link>
+          <button
+            type="button"
+            onClick={toggleTheme}
+            className="theme-toggle-btn"
+            aria-label="Toggle theme"
+            title={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+          >
+            {theme === 'dark' ? <SunIcon /> : <MoonIcon />}
+          </button>
           <button type="button" onClick={handleLogout} className="quiet-link muted">
-            sign out
+            Sign out
           </button>
         </div>
       </header>
 
-      <nav className="tabs-container">
+      {/* Navigation Tabs */}
+      <nav className="tabs-container animate-up delay-1">
         <button
           type="button"
           onClick={() => setActiveTab('journal')}
@@ -140,13 +181,14 @@ export default function Dashboard() {
         </button>
       </nav>
 
+      {/* Journal Tab */}
       {activeTab === 'journal' && (
         <div className="animate-up">
           {entries.length === 0 ? (
             <p className="empty-state">
               Nothing here yet.{' '}
               <Link to="/editor" className="quiet-link">
-                Start writing
+                Start writing →
               </Link>
             </p>
           ) : (
@@ -182,6 +224,7 @@ export default function Dashboard() {
         </div>
       )}
 
+      {/* Chapters Tab */}
       {activeTab === 'chapters' && (
         <div className="animate-up">
           <form onSubmit={handleCompileSummary} className="chapter-compile">
@@ -213,8 +256,15 @@ export default function Dashboard() {
                 <option value="monthly">a month</option>
               </select>
             </div>
-            <button type="submit" disabled={isCompiling} className="quiet-link chapter-compile-btn">
-              {isCompiling ? 'writing&hellip;' : 'write chapter'}
+            <button type="submit" disabled={isCompiling} className="chapter-compile-btn">
+              {isCompiling ? (
+                <>
+                  <span style={{ display: 'inline-block', animation: 'breathe 1.5s infinite' }}>◌</span>
+                  Writing…
+                </>
+              ) : (
+                <>✦ Write chapter</>
+              )}
             </button>
             {compileMessage && <p className="quiet-success">{compileMessage}</p>}
             {compileError && <p className="quiet-error">{compileError}</p>}
@@ -244,6 +294,7 @@ export default function Dashboard() {
         </div>
       )}
 
+      {/* Patterns / Mirror Tab */}
       {activeTab === 'mirror' && (
         <div className="animate-up">
           <section className="mirror-section">
