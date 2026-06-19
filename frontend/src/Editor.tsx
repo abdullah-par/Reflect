@@ -41,6 +41,32 @@ export default function Editor({ theme, toggleTheme }: Props) {
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
   const recognitionRef = useRef<any>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  useEffect(() => {
+    if (textareaRef.current) {
+      textareaRef.current.style.height = 'auto';
+      textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`;
+
+      if (document.activeElement === textareaRef.current) {
+        const caret = textareaRef.current.selectionEnd;
+        const sub = content.substring(0, caret);
+        const newlines = (sub.match(/\n/g) || []).length;
+        const style = window.getComputedStyle(textareaRef.current);
+        const fontSize = parseFloat(style.fontSize) || 16;
+        const lhRaw = style.lineHeight;
+        const lineHeight = lhRaw === 'normal' ? fontSize * 1.5 : parseFloat(lhRaw);
+        const padding = parseFloat(style.paddingTop) || 0;
+        const caretY = textareaRef.current.offsetTop + padding + (newlines * lineHeight) + (lineHeight / 2);
+        const targetScroll = caretY - (window.innerHeight / 2);
+        
+        window.scrollTo({
+          top: Math.max(0, targetScroll),
+          behavior: 'smooth'
+        });
+      }
+    }
+  }, [content]);
 
   useEffect(() => {
     return () => {
@@ -227,11 +253,13 @@ export default function Editor({ theme, toggleTheme }: Props) {
       <p className="watermark-date">{formatWatermarkDate()}</p>
 
       <textarea
+        ref={textareaRef}
         value={content}
         onChange={(e) => setContent(e.target.value)}
         placeholder=""
         className="editor-textarea"
         autoFocus
+        style={{ overflow: 'hidden' }}
       />
     </div>
   );

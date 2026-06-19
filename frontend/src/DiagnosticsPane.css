@@ -1,0 +1,171 @@
+/* DiagnosticsPane.css */
+
+.diagnostics-container {
+  padding: 1rem;
+  background: var(--bg-2);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border);
+  color: var(--text-1);
+}
+
+.diagnostic-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.diagnostic-header h2 {
+  margin: 0;
+  font-size: 1.25rem;
+  color: var(--text-2);
+}
+
+.run-btn,
+.re-run-btn {
+  background: var(--accent);
+  color: var(--bg);
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.run-btn:hover,
+.re-run-btn:hover {
+  background: var(--accent-hover);
+}
+
+.diagnostic-loading {
+  text-align: center;
+  padding: 2rem 0;
+  color: var(--text-3);
+}
+
+.diagnostic-empty {
+  text-align: center;
+  padding: 2rem 0;
+  color: var(--text-3);
+}
+
+.diagnostic-panel {
+  margin-bottom: 1rem;
+  background: var(--bg-3);
+  padding: 1rem;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-2);
+}
+
+.panel-title {
+  margin: 0 0 0.5rem 0;
+  font-size: 1.1rem;
+  color: var(--text-2);
+}
+
+.panel-content {
+  margin: 0;
+  color: var(--text-1);
+}
+
+.meta-info {
+  margin-bottom: 0.5rem;
+  font-size: 0.9rem;
+  color: var(--text-3);
+}
+
+@media (max-width: 600px) {
+  .diagnostics-container {
+    padding: 1rem;
+  }
+  .diagnostic-header h2 {
+    font-size: 1rem;
+  }
+}
+
+/* Pills and Meta */
+.pill-container {
+  margin-top: 1rem;
+}
+
+.pattern-pill {
+  display: inline-block;
+  background: var(--accent-muted, rgba(154, 123, 79, 0.15));
+  color: var(--accent);
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  border: 1px solid var(--accent-border, var(--border));
+}
+
+.loop-frequency-text {
+  margin-top: 0.75rem;
+  font-size: 0.85rem;
+  color: var(--text-3);
+  font-style: italic;
+}
+
+/* Flagged People Table */
+.flagged-people-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 1rem;
+  font-size: 0.9rem;
+}
+
+.flagged-people-table th,
+.flagged-people-table td {
+  padding: 0.5rem;
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+}
+
+.flagged-people-table th {
+  color: var(--text-2);
+  font-weight: 500;
+  border-bottom: 2px solid var(--border);
+}
+
+.person-name {
+  font-weight: 500;
+  color: var(--text-1);
+}
+
+.dynamic-label {
+  display: inline-block;
+  padding: 0.15rem 0.5rem;
+  border-radius: var(--radius-sm);
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  background: var(--bg-4);
+  color: var(--text-2);
+}
+
+.dynamic-label.supportive {
+  background: rgba(122, 158, 106, 0.15); /* Soft green */
+  color: #7A9E6A;
+}
+
+.dynamic-label.draining {
+  background: rgba(176, 92, 82, 0.15); /* Soft red */
+  color: var(--error);
+}
+
+.dynamic-label.transactional {
+  background: rgba(165, 150, 133, 0.15); /* Neutral/Muted */
+  color: var(--text-2);
+}
+
+/* Tactical Fix List */
+.tactical-fix-list {
+  margin: 1rem 0 0 1.5rem;
+  padding: 0;
+  color: var(--text-1);
+}
+
+.tactical-step {
+  margin-bottom: 0.5rem;
+  line-height: 1.5;
+}

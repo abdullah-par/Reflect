@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { fetchWithAuth, fetchSummaries, generateSummary } from './api';
+import { fetchWithAuth, fetchSummaries, generateSummary, fetchBooks } from './api';
 import { Theme } from './useTheme';
 import {
   groupEntriesByPeriod,
@@ -11,8 +11,9 @@ import {
   describeTonePresence,
   describePersonPresence,
 } from './utils/format';
-import HistoryPane from "./HistoryPane.tsx";
-import { useSettings } from './useSettings';
+import DiagnosticsPane from "./DiagnosticsPane";
+import LibraryPane from "./LibraryPane";
+import { useSettings, FontStyle } from './useSettings';
 
 interface Props {
   theme: Theme;
@@ -43,10 +44,37 @@ function SunIcon() {
   );
 }
 
+const FONT_OPTIONS = [
+  { value: 'editorial',    label: 'Crimson Text',    tag: 'editorial',  sample: 'Italic, warm. Classic diary feel.' },
+  { value: 'lora',         label: 'Lora',            tag: 'literary',   sample: 'Balanced. Best for long entries.' },
+  { value: 'playfair',     label: 'Playfair Display',tag: 'novel',      sample: 'High contrast. 19th-century diary.' },
+  { value: 'baskerville',  label: 'Libre Baskerville',tag: 'paperback', sample: 'Neutral, highly legible.' },
+  { value: 'merriweather', label: 'Merriweather',    tag: 'long-read',  sample: 'Comfortable at any length.' },
+  { value: 'source-serif', label: 'Source Serif 4',  tag: 'editorial',  sample: 'Modern. Magazine quality.' },
+  { value: 'typewriter',   label: 'Courier Prime',   tag: 'typewriter', sample: 'Raw draft energy.' },
+  { value: 'sans',         label: 'Inter',           tag: 'modern',     sample: 'Minimal, distraction-free.' },
+];
+
+function getFontFamily(style: FontStyle): string {
+  const map: Record<FontStyle, string> = {
+    editorial:    "'Crimson Text', Georgia, serif",
+    lora:         "'Lora', Georgia, serif",
+    playfair:     "'Playfair Display', Georgia, serif",
+    baskerville:  "'Libre Baskerville', Georgia, serif",
+    merriweather: "'Merriweather', Georgia, serif",
+    'source-serif': "'Source Serif 4', Georgia, serif",
+    typewriter:   "'Courier Prime', 'Courier New', monospace",
+    sans:         "'Inter', system-ui, sans-serif",
+  };
+  return map[style];
+}
+
 export default function Dashboard({ theme, toggleTheme }: Props) {
   const [entries, setEntries] = useState<any[]>([]);
   const [summaries, setSummaries] = useState<any[]>([]);
-  const [activeTab, setActiveTab] = useState<'journal' | 'chapters' | 'mirror' | 'manuscript' | 'settings' | 'history'>('journal');
+  const [books, setBooks] = useState<any[]>([]);
+  const [activeTab, setActiveTab] = useState<'library' | 'journal' | 'chapters' | 'mirror' | 'manuscript' | 'settings' | 'history' | 'diagnostics'>('library');
+  const [activeBookId, setActiveBookId] = useState<number | null>(null);
   const [selectedEntryId, setSelectedEntryId] = useState<string | null>(null);
   const [suggestedTitle, setSuggestedTitle] = useState<string | null>(null);
   const [suggesting, setSuggesting] = useState(false);
@@ -90,6 +118,7 @@ export default function Dashboard({ theme, toggleTheme }: Props) {
   const [compileError, setCompileError] = useState<string | null>(null);
 
   const navigate = useNavigate();
+  const { settings, updateSettings } = useSettings();
 
   useEffect(() => {
     loadData();
@@ -103,9 +132,10 @@ export default function Dashboard({ theme, toggleTheme }: Props) {
 
   async function loadData() {
     try {
-      const res = await fetchWithAuth('/entries/');
-      if (res.ok) {
-        setEntries(await res.json());
+      const resBooks = await fetchBooks();
+      setBooks(resBooks);
+      if (resBooks.length > 0 && !activeBookId) {
+        setActiveBookId(resBooks[0].id);
       }
       setSummaries(await fetchSummaries());
     } catch (err) {
@@ -113,8 +143,22 @@ export default function Dashboard({ theme, toggleTheme }: Props) {
     }
   }
 
+  useEffect(() => {
+    if (activeBookId) {
+      fetchWithAuth(`/entries/?book_id=${activeBookId}`)
+        .then(res => res.json())
+        .then(data => {
+          setEntries(data);
+          if (data.length > 0 && !selectedEntryId) {
+            setSelectedEntryId(data[0].id);
+          }
+        })
+        .catch(err => console.error('Error loading entries:', err));
+    }
+  }, [activeBookId]);
+
   const handleLogout = () => {
-    localStorage.removeItem('antigravity_token');
+    localStorage.removeItem('reflect_token');
     navigate('/');
   };
 
@@ -180,6 +224,12 @@ export default function Dashboard({ theme, toggleTheme }: Props) {
           <Link to="/" className="ds-logo">Reflect</Link>
           <nav className="ds-nav">
             <button
+              onClick={() => setActiveTab('library')}
+              className={`ds-nav-item ${activeTab === 'library' ? 'active' : ''}`}
+            >
+              Library
+            </button>
+            <button
               onClick={() => setActiveTab('journal')}
               className={`ds-nav-item ${activeTab === 'journal' ? 'active' : ''}`}
             >
@@ -209,11 +259,13 @@ export default function Dashboard({ theme, toggleTheme }: Props) {
             >
               Settings
             </button>
+
             <button
-              onClick={() => setActiveTab('history')}
-              className={`ds-nav-item ${activeTab === 'history' ? 'active' : ''}`}
+              onClick={() => setActiveTab('diagnostics')}
+              className={`ds-nav-item ${activeTab === 'diagnostics' ? 'active' : ''}`}
+              disabled={!selectedEntryId}
             >
-              History
+              Diagnostics
             </button>
           </nav>
         </div>
@@ -257,6 +309,13 @@ export default function Dashboard({ theme, toggleTheme }: Props) {
         </div>
 
         <div className="ds-content-inner animate-up">
+          {activeTab === 'library' && (
+            <LibraryPane books={books} onSelectBook={(id) => {
+              setActiveBookId(id);
+              setActiveTab('journal');
+            }} onBooksChanged={loadData} />
+          )}
+
           {activeTab === 'journal' && (
             entries.length === 0 ? (
               <div className="ds-empty-state">
@@ -344,9 +403,10 @@ export default function Dashboard({ theme, toggleTheme }: Props) {
             </div>
           )}
 
-          {activeTab === 'history' && (
-            <HistoryPane selectedEntryId={selectedEntryId} />
-          )}
+
+           {activeTab === 'diagnostics' && selectedEntryId && (
+             <DiagnosticsPane entryId={selectedEntryId} />
+           )}
 
           {activeTab === 'manuscript' && (
             <div>
@@ -379,19 +439,47 @@ export default function Dashboard({ theme, toggleTheme }: Props) {
 
           {activeTab === 'settings' && (
             <div className="settings-panel">
-              <section className="notebook-period">
+              <section className="notebook-period typography-settings">
                 <h2 className="period-title">Typography</h2>
-                <div className="settings-group">
-                  <label className="settings-label">Font Style</label>
-                  <select
-                    className="settings-select"
-                    value={settings.fontStyle}
-                    onChange={(e) => updateSettings({ fontStyle: e.target.value as any })}
-                  >
-                    <option value="editorial">Editorial (Serif)</option>
-                    <option value="typewriter">Typewriter (Monospace)</option>
-                    <option value="sans">Modern (Sans-serif)</option>
-                  </select>
+                
+                <div className="font-picker">
+                  {FONT_OPTIONS.map(opt => (
+                    <button
+                      key={opt.value}
+                      className={`font-option ${settings.fontStyle === opt.value ? 'active' : ''}`}
+                      onClick={() => updateSettings({ fontStyle: opt.value as FontStyle })}
+                      style={{ fontFamily: getFontFamily(opt.value as FontStyle) }}
+                    >
+                      <span className="font-option-name">{opt.label}</span>
+                      <span className="font-option-tag">{opt.tag}</span>
+                      <span className="font-option-sample">{opt.sample}</span>
+                    </button>
+                  ))}
+                </div>
+
+                <label className="settings-slider-row">Size
+                  <input type="range" min={14} max={22} step={1}
+                    value={settings.fontSize}
+                    onChange={e => updateSettings({ fontSize: Number(e.target.value) })}
+                    style={{ flex: 1, margin: '0 1rem' }} />
+                  <span className="settings-slider-value">{settings.fontSize}px</span>
+                </label>
+
+                <label className="settings-slider-row" style={{marginTop: '0.5rem'}}>Line height
+                  <input type="range" min={1.4} max={2.2} step={0.1}
+                    value={settings.lineHeight}
+                    onChange={e => updateSettings({ lineHeight: Number(e.target.value) })}
+                    style={{ flex: 1, margin: '0 1rem' }} />
+                  <span className="settings-slider-value">{settings.lineHeight}</span>
+                </label>
+
+                <div className="settings-preview"
+                  style={{ fontFamily: 'var(--font-body)',
+                           fontSize: settings.fontSize,
+                           lineHeight: settings.lineHeight,
+                           marginTop: '2rem' }}>
+                  I wrote this at midnight, unsure of everything
+                  but the pen moving across the page.
                 </div>
               </section>
               

@@ -11,7 +11,7 @@ type Edit = {
 };
 
 interface Props {
-  selectedEntryId: number | null;
+  selectedEntryId: string | null;
 }
 
 export default function HistoryPane({ selectedEntryId }: Props) {

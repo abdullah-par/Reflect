@@ -1,9 +1,19 @@
 import { useState, useEffect } from 'react';
 
-export type FontStyle = 'editorial' | 'typewriter' | 'sans';
+export type FontStyle = 
+  | 'editorial' 
+  | 'typewriter' 
+  | 'sans' 
+  | 'lora' 
+  | 'playfair' 
+  | 'baskerville' 
+  | 'merriweather' 
+  | 'source-serif';
 
 export interface AppSettings {
   fontStyle: FontStyle;
+  fontSize: number;
+  lineHeight: number;
   enableObserverNotes: boolean;
   enableMemoryEcho: boolean;
   enablePatterns: boolean;
@@ -11,6 +21,8 @@ export interface AppSettings {
 
 const DEFAULT_SETTINGS: AppSettings = {
   fontStyle: 'editorial',
+  fontSize: 17,
+  lineHeight: 1.8,
   enableObserverNotes: true,
   enableMemoryEcho: true,
   enablePatterns: true,
@@ -32,6 +44,8 @@ export function useSettings() {
   useEffect(() => {
     localStorage.setItem('reflect_settings', JSON.stringify(settings));
     document.documentElement.setAttribute('data-font', settings.fontStyle);
+    document.documentElement.style.setProperty('--reading-size', settings.fontSize + 'px');
+    document.documentElement.style.setProperty('--reading-lh', String(settings.lineHeight));
   }, [settings]);
 
   const updateSettings = (updates: Partial<AppSettings>) => {

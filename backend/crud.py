@@ -16,15 +16,42 @@ def create_user(db: Session, user: schemas.UserCreate):
     db.refresh(db_user)
     return db_user
 
-def get_entries(db: Session, user_id: int, skip: int = 0, limit: int = 100):
-    return (
-        db.query(models.JournalEntry)
-        .filter(models.JournalEntry.owner_id == user_id)
-        .order_by(models.JournalEntry.created_at.desc())
-        .offset(skip)
-        .limit(limit)
-        .all()
-    )
+def get_entries(db: Session, user_id: int, book_id: int = None, skip: int = 0, limit: int = 100):
+    query = db.query(models.JournalEntry).filter(models.JournalEntry.owner_id == user_id)
+    if book_id is not None:
+        query = query.filter(models.JournalEntry.book_id == book_id)
+    return query.order_by(models.JournalEntry.created_at.desc()).offset(skip).limit(limit).all()
+
+def create_user_entry(db: Session, entry: schemas.JournalEntryCreate, user_id: int):
+    if not entry.title:
+        entry.title = suggest_title(entry.content)
+    db_entry = models.JournalEntry(**entry.model_dump(), owner_id=user_id)
+    db.add(db_entry)
+    db.commit()
+    db.refresh(db_entry)
+    return db_entry
+
+def get_books(db: Session, user_id: int):
+    return db.query(models.Book).filter(models.Book.owner_id == user_id).order_by(models.Book.created_at.desc()).all()
+
+def get_book(db: Session, book_id: int, user_id: int):
+    return db.query(models.Book).filter(models.Book.id == book_id, models.Book.owner_id == user_id).first()
+
+def create_book(db: Session, book: schemas.BookCreate, user_id: int):
+    db_book = models.Book(**book.model_dump(), owner_id=user_id)
+    db.add(db_book)
+    db.commit()
+    db.refresh(db_book)
+    return db_book
+
+def update_book(db: Session, book_id: int, book_data: schemas.BookCreate, user_id: int):
+    db_book = db.query(models.Book).filter(models.Book.id == book_id, models.Book.owner_id == user_id).first()
+    if db_book:
+        db_book.title = book_data.title
+        db_book.cover_image_url = book_data.cover_image_url
+        db.commit()
+        db.refresh(db_book)
+    return db_book
 
 def get_entry(db: Session, entry_id: int):
     """Retrieve a journal entry by ID."""
@@ -99,3 +126,21 @@ def create_narrative_summary(db: Session, summary: schemas.NarrativeSummaryCreat
     db.commit()
     db.refresh(db_summary)
     return db_summary
+def save_diagnostic(db: Session, entry_id: int, diagnostic_data: dict):
+    """Create or update a CognitiveDiagnostic for a journal entry.
+    `diagnostic_data` is a dict matching the CognitiveDiagnostic fields
+    (except id and entry_id which are handled here)."""
+    # Check if a diagnostic already exists for this entry
+    existing = db.query(models.CognitiveDiagnostic).filter(models.CognitiveDiagnostic.entry_id == entry_id).first()
+    if existing:
+        for key, value in diagnostic_data.items():
+            setattr(existing, key, value)
+        db.commit()
+        db.refresh(existing)
+        return existing
+    # Create new diagnostic
+    new_diag = models.CognitiveDiagnostic(entry_id=entry_id, **diagnostic_data)
+    db.add(new_diag)
+    db.commit()
+    db.refresh(new_diag)
+    return new_diag

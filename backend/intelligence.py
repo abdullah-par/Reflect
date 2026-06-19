@@ -21,7 +21,7 @@ vectorstore = Chroma(
 # Initialize LLM
 llm = ChatGroq(
     temperature=0.3,
-    model_name="llama3-8b-8192",
+    model_name="llama-3.1-8b-instant",
     groq_api_key=os.getenv("GROQ_API_KEY")
 )
 
@@ -88,6 +88,81 @@ def process_entry(new_entry_content: str, user_id: int):
     )
 
     return insight_data, retrieved_docs
+
+# -------------------------------------------------------------------
+# Diagnostic Function – on‑demand cognitive analysis
+# -------------------------------------------------------------------
+DIAGNOSTIC_PROMPT = """
+You are the core intelligence engine of Project Reflect.
+Persona: Industrial Psychologist + Strategic Systems Thinker.
+
+RULES:
+- No generic motivation. Radical candor only.
+- Treat emotional distress as a loop with a trigger.
+- Name social dynamics directly (transactional, status‑posturing, etc).
+- End with a concrete 3‑step protocol executable TODAY.
+
+Current entry:
+"{entry}"
+
+Past 30‑day entries (for pattern frequency):
+{past_entries}
+
+Loop match count (how many past entries share this pattern): {loop_count}
+
+Return ONLY raw JSON:
+{{
+  "dominant_pattern": "short name of the loop",
+  "loop_frequency": {loop_count},
+  "mental_architecture": "2-3 sentences on current cognitive state",
+  "behavioral_blindspot": "what they cannot see in their own words",
+  "tactical_fix": "Step 1: ... Step 2: ... Step 3: ...",
+  "flagged_people": {{"Actual Person Name": "dynamic (transactional/supportive/draining)"}}
+}}
+"""
+
+diag_prompt = PromptTemplate(template=DIAGNOSTIC_PROMPT, input_variables=["entry", "past_entries", "loop_count"])
+
+def run_diagnostic(entry_content: str, user_id: int) -> dict:
+    # Retrieve past 30‑day entries (k=10 for a broader context)
+    try:
+        docs = vectorstore.similarity_search(
+            query=entry_content,
+            k=10,
+            filter={"user_id": user_id}
+        )
+        past = "\n---\n".join([d.page_content[:300] + ("..." if len(d.page_content) > 300 else "") for d in docs])
+        loop_count = len(docs)
+    except Exception as e:
+        print("Vector store error in diagnostic:", e)
+        past = ""
+        loop_count = 0
+
+    # Build and invoke LLM chain
+    try:
+        chain = diag_prompt | llm
+        response = chain.invoke({
+            "entry": entry_content,
+            "past_entries": past,
+            "loop_count": loop_count
+        })
+        raw = response.content.strip()
+        if raw.startswith("```json"):
+            raw = raw[7:-3]
+        if raw.startswith("```"):
+            raw = raw[3:-3]
+        diagnostic_data = json.loads(raw)
+    except Exception as e:
+        print("LLM error in diagnostic:", e)
+        diagnostic_data = {
+            "dominant_pattern": "Unknown",
+            "loop_frequency": loop_count,
+            "mental_architecture": "",
+            "behavioral_blindspot": "",
+            "tactical_fix": "",
+            "flagged_people": {}
+        }
+    return diagnostic_data
 
 NARRATIVE_PROMPT = """
 You are a wise, observant biographer reading a person's journal entries for a recent period.

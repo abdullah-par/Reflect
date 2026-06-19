@@ -7,7 +7,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 import crud, models, schemas, auth
 from database import SessionLocal, engine
-from typing import List
+from typing import List, Optional
 
 # Create the database tables
 models.Base.metadata.create_all(bind=engine)
@@ -120,13 +120,38 @@ def create_entry(
 
 @app.get("/entries/", response_model=list[schemas.JournalEntry])
 def read_entries(
+    book_id: Optional[int] = None,
     skip: int = 0, 
     limit: int = 100, 
     db: Session = Depends(get_db),
     current_user: schemas.User = Depends(get_current_user)
 ):
-    entries = crud.get_entries(db, user_id=current_user.id, skip=skip, limit=limit)
+    entries = crud.get_entries(db, user_id=current_user.id, book_id=book_id, skip=skip, limit=limit)
     return entries
+
+# ----- Book Endpoints -----
+
+@app.get("/books/", response_model=List[schemas.Book])
+def read_books(db: Session = Depends(get_db), current_user: schemas.User = Depends(get_current_user)):
+    return crud.get_books(db, user_id=current_user.id)
+
+@app.post("/books/", response_model=schemas.Book)
+def create_book(book: schemas.BookCreate, db: Session = Depends(get_db), current_user: schemas.User = Depends(get_current_user)):
+    return crud.create_book(db, book=book, user_id=current_user.id)
+
+@app.put("/books/{book_id}", response_model=schemas.Book)
+def update_book(book_id: int, book: schemas.BookCreate, db: Session = Depends(get_db), current_user: schemas.User = Depends(get_current_user)):
+    db_book = crud.update_book(db, book_id=book_id, book_data=book, user_id=current_user.id)
+    if not db_book:
+        raise HTTPException(status_code=404, detail="Book not found")
+    return db_book
+
+@app.get("/books/{book_id}", response_model=schemas.Book)
+def read_book(book_id: int, db: Session = Depends(get_db), current_user: schemas.User = Depends(get_current_user)):
+    db_book = crud.get_book(db, book_id=book_id, user_id=current_user.id)
+    if not db_book:
+        raise HTTPException(status_code=404, detail="Book not found")
+    return db_book
 
 # ----- New Endpoints -----
 
@@ -144,7 +169,33 @@ def suggest_entry_title(entry_id: int, db: Session = Depends(get_db), current_us
         raise HTTPException(status_code=404, detail="Entry not found")
     suggestion = crud.suggest_title(entry.content)
     return {"suggested_title": suggestion}
+@app.post("/entries/{entry_id}/diagnose", response_model=schemas.CognitiveDiagnostic)
 
+def diagnose_entry(
+    entry_id: int,
+    db: Session = Depends(get_db),
+    current_user: schemas.User = Depends(get_current_user)
+):
+    entry = crud.get_entry(db, entry_id)
+    if not entry or entry.owner_id != current_user.id:
+        raise HTTPException(status_code=404, detail="Entry not found")
+    result = intelligence.run_diagnostic(entry.content, current_user.id)
+    return crud.save_diagnostic(db=db, entry_id=entry_id, diagnostic_data=result)
+
+@app.get("/entries/{entry_id}/diagnose", response_model=schemas.CognitiveDiagnostic)
+
+def get_diagnostic(
+    entry_id: int,
+    db: Session = Depends(get_db),
+    current_user: schemas.User = Depends(get_current_user)
+):
+    entry = crud.get_entry(db, entry_id)
+    if not entry or entry.owner_id != current_user.id:
+        raise HTTPException(status_code=404, detail="Entry not found")
+    diagnostic = db.query(models.CognitiveDiagnostic).filter(models.CognitiveDiagnostic.entry_id == entry_id).first()
+    if not diagnostic:
+        raise HTTPException(status_code=404, detail="Diagnostic not found")
+    return diagnostic
 
 @app.post("/summaries/generate", response_model=schemas.NarrativeSummary)
 def generate_summary(

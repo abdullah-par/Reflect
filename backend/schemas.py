@@ -34,9 +34,25 @@ class NarrativeSummary(NarrativeSummaryBase):
     class Config:
         from_attributes = True
 
+class BookBase(BaseModel):
+    title: str = "My Journal"
+    cover_image_url: Optional[str] = None
+
+class BookCreate(BookBase):
+    pass
+
+class Book(BookBase):
+    id: int
+    owner_id: int
+    created_at: datetime.datetime
+
+    class Config:
+        from_attributes = True
+
 class JournalEntryBase(BaseModel):
     title: Optional[str] = None
     content: str
+    book_id: Optional[int] = None
 
 class JournalEntryCreate(JournalEntryBase):
     pass
@@ -66,17 +82,7 @@ class JournalEntryEdit(JournalEntryEditBase):
     class Config:
         from_attributes = True
 
-class JournalEntryCreate(JournalEntryBase):
-    pass
 
-class JournalEntry(JournalEntryBase):
-    id: int
-    created_at: datetime.datetime
-    owner_id: int
-    insight: Optional[EntryInsight] = None
-
-    class Config:
-        from_attributes = True
 
 class UserBase(BaseModel):
     email: str
@@ -96,5 +102,21 @@ class Token(BaseModel):
     access_token: str
     token_type: str
 
-class TokenData(BaseModel):
-    email: Optional[str] = None
+class CognitiveDiagnosticBase(BaseModel):
+    entry_id: int
+    mental_architecture: str
+    behavioral_blindspot: str
+    tactical_fix: str
+    loop_frequency: Optional[int] = None
+    flagged_people: Optional[Dict[str, Any]] = None
+    dominant_pattern: Optional[str] = None
+
+class CognitiveDiagnosticCreate(CognitiveDiagnosticBase):
+    pass
+
+class CognitiveDiagnostic(CognitiveDiagnosticBase):
+    id: int
+
+    class Config:
+        from_attributes = True
+

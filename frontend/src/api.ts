@@ -49,3 +49,39 @@ export const generateSummary = async (periodStart: string, periodEnd: string, ty
   const errorData = await res.json().catch(() => ({}));
   throw new Error(errorData.detail || 'Failed to generate summary');
 };
+export const runDiagnostic = async (entryId: string) => {
+  const res = await fetchWithAuth(`/entries/${entryId}/diagnose`, { method: 'POST' })
+  if (!res.ok) throw new Error('Diagnostic failed')
+  return await res.json()
+}
+
+export const fetchDiagnostic = async (entryId: string) => {
+  const res = await fetchWithAuth(`/entries/${entryId}/diagnose`)
+  if (res.status === 404) return null // not yet run
+  if (!res.ok) throw new Error('Could not load diagnostic')
+  return await res.json()
+}
+
+export const fetchBooks = async () => {
+  const res = await fetchWithAuth('/books/');
+  if (res.ok) return await res.json();
+  throw new Error('Failed to fetch books');
+};
+
+export const createBook = async (title: string, coverImageUrl?: string) => {
+  const res = await fetchWithAuth('/books/', {
+    method: 'POST',
+    body: JSON.stringify({ title, cover_image_url: coverImageUrl }),
+  });
+  if (res.ok) return await res.json();
+  throw new Error('Failed to create book');
+};
+
+export const updateBook = async (bookId: number, title: string, coverImageUrl?: string) => {
+  const res = await fetchWithAuth(`/books/${bookId}`, {
+    method: 'PUT',
+    body: JSON.stringify({ title, cover_image_url: coverImageUrl }),
+  });
+  if (res.ok) return await res.json();
+  throw new Error('Failed to update book');
+};
