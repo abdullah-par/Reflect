@@ -1,0 +1,38 @@
+from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, Text, DateTime, JSON
+from sqlalchemy.orm import relationship
+import datetime
+
+from database import Base
+
+class User(Base):
+    __tablename__ = "users"
+
+    id = Column(Integer, primary_key=True, index=True)
+    email = Column(String, unique=True, index=True)
+    hashed_password = Column(String)
+    is_active = Column(Boolean, default=True)
+
+    entries = relationship("JournalEntry", back_populates="owner")
+
+class JournalEntry(Base):
+    __tablename__ = "journal_entries"
+
+    id = Column(Integer, primary_key=True, index=True)
+    content = Column(Text, index=False)
+    created_at = Column(DateTime, default=datetime.datetime.utcnow)
+    owner_id = Column(Integer, ForeignKey("users.id"))
+
+    owner = relationship("User", back_populates="entries")
+    insight = relationship("EntryInsight", back_populates="entry", uselist=False)
+
+class EntryInsight(Base):
+    __tablename__ = "entry_insights"
+
+    id = Column(Integer, primary_key=True, index=True)
+    entry_id = Column(Integer, ForeignKey("journal_entries.id"), unique=True)
+    pattern_name = Column(String, nullable=True)
+    emotional_tone = Column(String, nullable=True)
+    relationships_tracked = Column(JSON, nullable=True)
+    takeaway = Column(Text, nullable=True)
+
+    entry = relationship("JournalEntry", back_populates="insight")
