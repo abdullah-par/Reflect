@@ -1,5 +1,6 @@
 import { Link, Navigate } from 'react-router-dom';
 import { Theme } from './useTheme';
+import { Feather, Clock, Lock } from 'lucide-react';
 
 interface Props {
   theme: Theme;
@@ -40,7 +41,7 @@ function CheckIcon() {
 }
 
 export default function Landing({ theme, toggleTheme }: Props) {
-  const token = localStorage.getItem('antigravity_token');
+  const token = localStorage.getItem('reflect_token');
   if (token) {
     return <Navigate to="/app" replace />;
   }
@@ -77,8 +78,8 @@ export default function Landing({ theme, toggleTheme }: Props) {
       {/* ── HERO ── */}
       <section className="lp-hero">
         <div className="lp-container">
-          <div className="lp-hero-layout">
-            <div className="lp-hero-text">
+          <div className="lp-hero-layout animate-up">
+            <div className="lp-hero-text animate-up delay-1">
               <p className="lp-hero-label">Personal AI Journal</p>
               <h1 className="lp-hero-title">
                 A journal that remembers everything you've written
@@ -93,7 +94,7 @@ export default function Landing({ theme, toggleTheme }: Props) {
               <p className="lp-hero-note">No credit card required. Your data stays on your device.</p>
             </div>
 
-            <div className="lp-hero-preview">
+            <div className="lp-hero-preview animate-up delay-2">
               <div className="lp-app-window">
                 <div className="lp-window-bar">
                   <span className="lp-window-dot" />
@@ -148,30 +149,7 @@ export default function Landing({ theme, toggleTheme }: Props) {
         </div>
       </section>
 
-      {/* ── SOCIAL PROOF BAR ── */}
-      <div className="lp-proof-bar">
-        <div className="lp-container">
-          <div className="lp-proof-inner">
-            <span className="lp-proof-text">Trusted by writers, therapists, and people who want to know themselves better</span>
-            <div className="lp-proof-stats">
-              <div className="lp-stat">
-                <span className="lp-stat-num">12,000+</span>
-                <span className="lp-stat-label">entries analyzed</span>
-              </div>
-              <div className="lp-stat-divider" />
-              <div className="lp-stat">
-                <span className="lp-stat-num">94%</span>
-                <span className="lp-stat-label">notice patterns within 2 weeks</span>
-              </div>
-              <div className="lp-stat-divider" />
-              <div className="lp-stat">
-                <span className="lp-stat-num">Private</span>
-                <span className="lp-stat-label">data never leaves your account</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
+
 
       {/* ── FEATURES ── */}
       <section className="lp-section" id="features">
@@ -182,7 +160,7 @@ export default function Landing({ theme, toggleTheme }: Props) {
           </div>
 
           <div className="lp-features-grid">
-            <div className="lp-feature-row">
+            <div className="lp-feature-row animate-up delay-1">
               <div className="lp-feature-text">
                 <h3 className="lp-feature-title">Pattern recognition across all your entries</h3>
                 <p className="lp-feature-desc">
@@ -229,7 +207,7 @@ export default function Landing({ theme, toggleTheme }: Props) {
               </div>
             </div>
 
-            <div className="lp-feature-row lp-feature-row-reverse">
+            <div className="lp-feature-row lp-feature-row-reverse animate-up delay-2">
               <div className="lp-feature-text">
                 <h3 className="lp-feature-title">Your past entries, surfaced in context</h3>
                 <p className="lp-feature-desc">
@@ -262,7 +240,7 @@ export default function Landing({ theme, toggleTheme }: Props) {
               </div>
             </div>
 
-            <div className="lp-feature-row">
+            <div className="lp-feature-row animate-up delay-3">
               <div className="lp-feature-text">
                 <h3 className="lp-feature-title">AI-written summaries of any period</h3>
                 <p className="lp-feature-desc">

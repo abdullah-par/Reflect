@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, Link, Navigate } from 'react-router-dom';
 import { API_URL } from './api';
 import { Theme } from './useTheme';
 
@@ -52,6 +52,11 @@ const QUOTES = [
 ];
 
 export default function Auth({ theme, toggleTheme }: Props) {
+  const token = localStorage.getItem('reflect_token');
+  if (token) {
+    return <Navigate to="/app" replace />;
+  }
+
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');

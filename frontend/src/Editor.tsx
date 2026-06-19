@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { fetchWithAuth } from './api';
 import { formatWatermarkDate, formatPastEchoLabel, buildObserverNote } from './utils/format';
 import { Theme } from './useTheme';
+import TypewriterText from './TypewriterText';
 
 interface Props {
   theme: Theme;
@@ -252,15 +253,33 @@ export default function Editor({ theme, toggleTheme }: Props) {
 
       <p className="watermark-date">{formatWatermarkDate()}</p>
 
-      <textarea
-        ref={textareaRef}
-        value={content}
-        onChange={(e) => setContent(e.target.value)}
-        placeholder=""
-        className="editor-textarea"
-        autoFocus
-        style={{ overflow: 'hidden' }}
-      />
+      <div style={{ position: 'relative', flex: 1, display: 'flex', flexDirection: 'column' }}>
+        {content === '' && (
+          <div style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            pointerEvents: 'none',
+            color: 'var(--text-3)',
+            fontFamily: 'var(--font-body)',
+            fontSize: 'var(--reading-size, 1.05rem)',
+            lineHeight: 'var(--reading-lh, 1.85)',
+            padding: '0',
+            opacity: 0.6
+          }}>
+            <TypewriterText text="I'm thinking about..." speed={40} />
+          </div>
+        )}
+        <textarea
+          ref={textareaRef}
+          value={content}
+          onChange={(e) => setContent(e.target.value)}
+          placeholder=""
+          className="editor-textarea"
+          autoFocus
+          style={{ overflow: 'hidden' }}
+        />
+      </div>
     </div>
   );
 }

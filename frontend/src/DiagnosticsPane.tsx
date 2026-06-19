@@ -72,6 +72,7 @@ const DiagnosticsPane: React.FC<Props> = ({ entryId }) => {
 
   return (
     <div className="diagnostics-container">
+      <div className="wax-seal">R</div>
       {/* Re‑run link */}
       <div className="diagnostic-header">
         <h2>AI Diagnostic</h2>

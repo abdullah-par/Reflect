@@ -26,6 +26,12 @@ export const fetchWithAuth = async (url: string, options: RequestInit = {}) => {
   return response;
 };
 
+export const fetchCurrentUser = async () => {
+  const res = await fetchWithAuth('/users/me/');
+  if (res.ok) return await res.json(); // { id, email }
+  throw new Error('Failed to fetch user');
+};
+
 export const fetchSummaries = async () => {
   const res = await fetchWithAuth('/summaries/');
   if (res.ok) {

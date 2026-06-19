@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { fetchWithAuth, fetchSummaries, generateSummary, fetchBooks } from './api';
+import { fetchWithAuth, fetchSummaries, generateSummary, fetchBooks, fetchCurrentUser } from './api';
 import { Theme } from './useTheme';
 import {
   groupEntriesByPeriod,
@@ -11,8 +11,11 @@ import {
   describeTonePresence,
   describePersonPresence,
 } from './utils/format';
+
+import { Library, Book, Bookmark, Activity, BookOpen, Settings, Stethoscope } from 'lucide-react';
 import DiagnosticsPane from "./DiagnosticsPane";
 import LibraryPane from "./LibraryPane";
+import MirrorPane from "./MirrorPane";
 import { useSettings, FontStyle } from './useSettings';
 
 interface Props {
@@ -78,6 +81,8 @@ export default function Dashboard({ theme, toggleTheme }: Props) {
   const [selectedEntryId, setSelectedEntryId] = useState<string | null>(null);
   const [suggestedTitle, setSuggestedTitle] = useState<string | null>(null);
   const [suggesting, setSuggesting] = useState(false);
+  const [user, setUser] = useState<{ email: string } | null>(null);
+  const [accountMenuOpen, setAccountMenuOpen] = useState(false);
 
   const handleSuggestTitle = async () => {
     if (!selectedEntryId) return;
@@ -116,6 +121,14 @@ export default function Dashboard({ theme, toggleTheme }: Props) {
   const [isCompiling, setIsCompiling] = useState(false);
   const [compileMessage, setCompileMessage] = useState<string | null>(null);
   const [compileError, setCompileError] = useState<string | null>(null);
+  const [isIndexOpen, setIsIndexOpen] = useState(false);
+
+  // Book Builder State
+  const [bookTitle, setBookTitle] = useState('My Reflections');
+  const [bookAuthor, setBookAuthor] = useState('');
+  const [coverStyle, setCoverStyle] = useState<'leather' | 'linen' | 'typewriter'>('leather');
+  const [includeNotes, setIncludeNotes] = useState(true);
+  const [includeEchoes, setIncludeEchoes] = useState(true);
 
   const navigate = useNavigate();
   const { settings, updateSettings } = useSettings();
@@ -132,6 +145,7 @@ export default function Dashboard({ theme, toggleTheme }: Props) {
 
   async function loadData() {
     try {
+      fetchCurrentUser().then(setUser).catch(() => {});
       const resBooks = await fetchBooks();
       setBooks(resBooks);
       if (resBooks.length > 0 && !activeBookId) {
@@ -161,6 +175,7 @@ export default function Dashboard({ theme, toggleTheme }: Props) {
     localStorage.removeItem('reflect_token');
     navigate('/');
   };
+
 
   const handleCompileSummary = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -227,37 +242,40 @@ export default function Dashboard({ theme, toggleTheme }: Props) {
               onClick={() => setActiveTab('library')}
               className={`ds-nav-item ${activeTab === 'library' ? 'active' : ''}`}
             >
-              Library
+              <Library size={16} /> Library
             </button>
             <button
-              onClick={() => setActiveTab('journal')}
+              onClick={() => {
+                setActiveTab('journal');
+                if (activeTab === 'journal') setIsIndexOpen(!isIndexOpen);
+              }}
               className={`ds-nav-item ${activeTab === 'journal' ? 'active' : ''}`}
             >
-              Journal
+              <Book size={16} /> Journal
             </button>
             <button
               onClick={() => setActiveTab('chapters')}
               className={`ds-nav-item ${activeTab === 'chapters' ? 'active' : ''}`}
             >
-              Chapters
+              <Bookmark size={16} /> Chapters
             </button>
             <button
               onClick={() => setActiveTab('mirror')}
               className={`ds-nav-item ${activeTab === 'mirror' ? 'active' : ''}`}
             >
-              Patterns
+              <Activity size={16} /> Patterns
             </button>
             <button
               onClick={() => setActiveTab('manuscript')}
               className={`ds-nav-item ${activeTab === 'manuscript' ? 'active' : ''}`}
             >
-              Book
+              <BookOpen size={16} /> Book
             </button>
             <button
               onClick={() => setActiveTab('settings')}
               className={`ds-nav-item ${activeTab === 'settings' ? 'active' : ''}`}
             >
-              Settings
+              <Settings size={16} /> Settings
             </button>
 
             <button
@@ -265,36 +283,47 @@ export default function Dashboard({ theme, toggleTheme }: Props) {
               className={`ds-nav-item ${activeTab === 'diagnostics' ? 'active' : ''}`}
               disabled={!selectedEntryId}
             >
-              Diagnostics
+              <Stethoscope size={16} /> Diagnostics
             </button>
           </nav>
         </div>
+      </aside>
 
-        {activeTab === 'journal' && groupedEntries.length > 0 && (
-          <>
-            <div className="ds-divider" />
-            <div className="ds-entry-list">
+      {/* ───────────────── MAIN PANE ───────────────── */}
+      <main className="ds-main">
+        {/* Index Drawer Overlay */}
+        <div className={`ds-index-drawer ${isIndexOpen && activeTab === 'journal' ? 'open' : ''}`}>
+          <button className="ds-index-close" onClick={() => setIsIndexOpen(false)} aria-label="Close index">
+            ✕
+          </button>
+          <h2 className="ds-index-title">Index</h2>
+          {groupedEntries.length > 0 ? (
+            <div className="ds-entry-list" style={{ padding: 0 }}>
               {groupedEntries.map(({ label, entries: periodEntries }) => (
                 <div key={label} style={{ marginBottom: '1rem' }}>
-                  <div className="ds-entry-date" style={{ padding: '0 12px', marginBottom: '6px' }}>{label}</div>
+                  <div className="ds-entry-date" style={{ padding: '0 12px', marginBottom: '6px', fontFamily: 'var(--font-ui)' }}>{label}</div>
                   {periodEntries.map(entry => (
                     <button
                       key={entry.id}
-                      onClick={() => setSelectedEntryId(entry.id)}
+                      onClick={() => {
+                        setSelectedEntryId(entry.id);
+                        setIsIndexOpen(false); // Close on selection for mobile-friendly flow
+                      }}
                       className={`ds-entry-item ${selectedEntryId === entry.id ? 'active' : ''}`}
+                      style={{ padding: '8px 12px' }}
                     >
-                      <div className="ds-entry-preview">{entry.content}</div>
+                      <div className="ds-entry-preview" style={{ fontFamily: 'var(--font-head)', fontSize: '1rem' }}>{entry.content}</div>
                     </button>
                   ))}
                 </div>
               ))}
             </div>
-          </>
-        )}
-      </aside>
+          ) : (
+            <p className="ds-empty-state" style={{ height: 'auto', marginTop: '2rem' }}>No entries yet.</p>
+          )}
+        </div>
 
-      {/* ───────────────── MAIN PANE ───────────────── */}
-      <main className="ds-main">
+        {/* Top Right Controls */}
         <div style={{ position: 'absolute', top: '1.5rem', right: '2rem', display: 'flex', gap: '1rem', alignItems: 'center', zIndex: 10 }}>
           <button
             type="button"
@@ -305,7 +334,38 @@ export default function Dashboard({ theme, toggleTheme }: Props) {
             {theme === 'dark' ? <SunIcon /> : <MoonIcon />}
           </button>
           <Link to="/editor" className="quiet-link">✦ Write</Link>
-          <button onClick={handleLogout} className="quiet-link muted">Sign out</button>
+          
+          {user && (
+            <div style={{ position: 'relative' }}>
+              <button 
+                onClick={() => setAccountMenuOpen(!accountMenuOpen)}
+                style={{ 
+                  width: '32px', height: '32px', borderRadius: 'var(--radius-full)',
+                  background: 'var(--accent-2)', color: 'white', border: 'none',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  fontWeight: 'bold', cursor: 'pointer', boxShadow: 'var(--shadow-sm)'
+                }}
+              >
+                {user.email.charAt(0).toUpperCase()}
+              </button>
+              
+              {accountMenuOpen && (
+                <div style={{
+                  position: 'absolute', top: '100%', right: 0, marginTop: '8px',
+                  background: 'var(--bg-2)', border: '1px solid var(--border)',
+                  borderRadius: 'var(--radius-sm)', boxShadow: 'var(--shadow-lg)',
+                  padding: '8px', minWidth: '150px', zIndex: 100
+                }}>
+                  <div style={{ padding: '8px', fontSize: '0.85rem', color: 'var(--text-2)', borderBottom: '1px solid var(--border)', marginBottom: '4px', wordBreak: 'break-all' }}>
+                    {user.email}
+                  </div>
+                  <button onClick={handleLogout} style={{ width: '100%', textAlign: 'left', padding: '8px', background: 'transparent', border: 'none', color: 'var(--text-1)', cursor: 'pointer', borderRadius: 'var(--radius-xs)' }}>
+                    Sign out
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
         </div>
 
         <div className="ds-content-inner animate-up">
@@ -387,7 +447,19 @@ export default function Dashboard({ theme, toggleTheme }: Props) {
               </form>
 
               {summaries.length === 0 ? (
-                <p className="empty-state">No chapters yet.</p>
+                <div className="ds-empty-state">
+                  <p>No chapters yet.</p>
+                  <button 
+                    onClick={() => {
+                      const startInput = document.querySelector('input[type="date"]');
+                      if (startInput) (startInput as HTMLElement).focus();
+                    }} 
+                    className="quiet-link" 
+                    style={{ marginTop: '1rem', cursor: 'pointer', background: 'transparent', border: 'none' }}
+                  >
+                    Select a date range above to compile one →
+                  </button>
+                </div>
               ) : (
                 summaries.map((summary) => (
                   <article key={summary.id} className="book-chapter animate-up">
@@ -403,36 +475,91 @@ export default function Dashboard({ theme, toggleTheme }: Props) {
             </div>
           )}
 
+           {activeTab === 'mirror' && (
+             <div className="ds-content-inner animate-up">
+               <MirrorPane relationships={relationships} patterns={patterns} toneCounts={toneCounts} />
+             </div>
+           )}
 
            {activeTab === 'diagnostics' && selectedEntryId && (
              <DiagnosticsPane entryId={selectedEntryId} />
            )}
 
           {activeTab === 'manuscript' && (
-            <div>
-              <div className="manuscript-controls">
-                <p className="chapter-compile-intro">
-                  Bundle your entire journal chronologically into a beautifully typeset book. Ready to print or export as PDF.
-                </p>
-                <button type="button" onClick={() => window.print()} className="chapter-compile-btn">
+            <div className="book-builder-split">
+              <div className="book-settings-panel">
+                <h2 className="period-title">Book Customization</h2>
+                
+                <div className="settings-group">
+                  <label className="settings-label">Title
+                    <input type="text" value={bookTitle} onChange={e => setBookTitle(e.target.value)} className="settings-input" />
+                  </label>
+                  <label className="settings-label" style={{marginTop: '1rem'}}>Author
+                    <input type="text" value={bookAuthor} onChange={e => setBookAuthor(e.target.value)} className="settings-input" />
+                  </label>
+                </div>
+
+                <div className="settings-group" style={{marginTop: '2rem'}}>
+                  <h3 className="settings-subtitle">Cover Style</h3>
+                  <div className="cover-style-options">
+                    <button className={`cover-option ${coverStyle === 'leather' ? 'active' : ''}`} onClick={() => setCoverStyle('leather')}>Leather</button>
+                    <button className={`cover-option ${coverStyle === 'linen' ? 'active' : ''}`} onClick={() => setCoverStyle('linen')}>Linen</button>
+                    <button className={`cover-option ${coverStyle === 'typewriter' ? 'active' : ''}`} onClick={() => setCoverStyle('typewriter')}>Typewriter</button>
+                  </div>
+                </div>
+
+                <div className="settings-group" style={{marginTop: '2rem'}}>
+                  <h3 className="settings-subtitle">Content</h3>
+                  <label className="settings-toggle">
+                    <input type="checkbox" checked={includeNotes} onChange={e => setIncludeNotes(e.target.checked)} />
+                    <span className="settings-toggle-text">Include AI Observer Notes</span>
+                  </label>
+                  <label className="settings-toggle">
+                    <input type="checkbox" checked={includeEchoes} onChange={e => setIncludeEchoes(e.target.checked)} />
+                    <span className="settings-toggle-text">Include Memory Echoes</span>
+                  </label>
+                </div>
+
+                <button type="button" onClick={() => window.print()} className="chapter-compile-btn" style={{marginTop: '3rem'}}>
                   ✦ Print / Export to PDF
                 </button>
               </div>
-              <div className="manuscript-preview print-area">
-                <h1 className="manuscript-title">My Reflections</h1>
-                {groupedEntries.map(({ label, entries: periodEntries }) => (
-                  <div key={label} className="manuscript-chapter">
-                    <h2 className="manuscript-chapter-title">{label}</h2>
-                    <div className="manuscript-chapter-content">
-                      {periodEntries.map(entry => (
-                        <div key={entry.id} className="manuscript-entry">
-                          <span className="manuscript-date">{formatEntryTime(entry.created_at)}: </span>
-                          {entry.content}
-                        </div>
-                      ))}
-                    </div>
+
+              <div className="book-preview-pane">
+                <div className="book-preview-wrapper">
+                  <div className={`book-cover-preview cover-${coverStyle}`}>
+                    <h1 className="book-cover-title">{bookTitle}</h1>
+                    {bookAuthor && <h2 className="book-cover-author">{bookAuthor}</h2>}
                   </div>
-                ))}
+                  
+                  <div className="manuscript-preview print-area">
+                    <div className="print-cover-page">
+                      <h1 className="manuscript-title">{bookTitle}</h1>
+                      {bookAuthor && <p style={{textAlign: 'center', marginBottom: '4rem'}}>by {bookAuthor}</p>}
+                    </div>
+                    {groupedEntries.map(({ label, entries: periodEntries }) => (
+                      <div key={label} className="manuscript-chapter">
+                        <h2 className="manuscript-chapter-title">{label}</h2>
+                        <div className="manuscript-chapter-content">
+                          {periodEntries.map(entry => (
+                            <div key={entry.id} className="manuscript-entry">
+                              <span className="manuscript-date">{formatEntryTime(entry.created_at)}: </span>
+                              {entry.content}
+                              {includeNotes && entry.insight && <div className="print-insight" style={{marginTop: '8px', fontSize: '0.9em', color: 'var(--text-2)', fontStyle: 'italic'}}><b>Reflect Noticed:</b> {buildObserverNote(entry.insight)}</div>}
+                              {includeEchoes && entry.insight?.relevant_past_entries?.length > 0 && (
+                                <div className="print-echoes" style={{marginTop: '8px', fontSize: '0.9em', color: 'var(--text-3)'}}>
+                                  {entry.insight.relevant_past_entries.map((past: any, idx: number) => (
+                                    <p key={idx}><i>Echo ({formatPastEchoLabel(past.metadata?.created_at || past.created_at)}):</i> {past.content}</p>
+                                  ))}
+                                </div>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
               </div>
             </div>
           )}
