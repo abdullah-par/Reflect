@@ -32,6 +32,25 @@ function SunIcon() {
   );
 }
 
+const QUOTES = [
+  {
+    text: "There is nothing either good or bad, but thinking makes it so.",
+    author: "William Shakespeare"
+  },
+  {
+    text: "To live without Hope is to Cease to live.",
+    author: "Fyodor Dostoevsky"
+  },
+  {
+    text: "The mystery of human existence lies not in just staying alive, but in finding something to live for.",
+    author: "Fyodor Dostoevsky"
+  },
+  {
+    text: "To thine own self be true.",
+    author: "William Shakespeare"
+  }
+];
+
 export default function Auth({ theme, toggleTheme }: Props) {
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState('');
@@ -39,6 +58,7 @@ export default function Auth({ theme, toggleTheme }: Props) {
   const [error, setError] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const navigate = useNavigate();
+  const [quote] = useState(() => QUOTES[Math.floor(Math.random() * QUOTES.length)]);
 
   const parseError = async (res: Response, fallback: string) => {
     try {
@@ -94,70 +114,83 @@ export default function Auth({ theme, toggleTheme }: Props) {
   };
 
   return (
-    <div className="auth-page">
-      <div className="auth-card">
-        <div className="auth-card-top">
-          <Link to="/" className="auth-wordmark">
-            Reflect
-          </Link>
-          <button
-            type="button"
-            onClick={toggleTheme}
-            className="theme-toggle-btn"
-            aria-label="Toggle theme"
-          >
-            {theme === 'dark' ? <SunIcon /> : <MoonIcon />}
-          </button>
+    <div className="auth-split">
+      <div className="auth-quote-pane">
+        <div className="auth-quote-inner">
+          <blockquote className="auth-quote-text">
+            "{quote.text}"
+          </blockquote>
+          <div className="auth-quote-author">
+            {quote.author}
+          </div>
         </div>
-        <p className="auth-tagline">
-          {isLogin ? 'Welcome back.' : 'Start your journey.'}
-        </p>
-
-        <form onSubmit={handleSubmit} className="auth-form">
-          <div className="auth-input-group">
-            <label className="auth-input-label" htmlFor="auth-email">Email</label>
-            <input
-              id="auth-email"
-              type="email"
-              placeholder="you@example.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              autoComplete="email"
-            />
+      </div>
+      
+      <div className="auth-form-pane">
+        <div className="auth-card">
+          <div className="auth-card-top">
+            <Link to="/" className="auth-wordmark">
+              Reflect
+            </Link>
+            <button
+              type="button"
+              onClick={toggleTheme}
+              className="theme-toggle-btn"
+              aria-label="Toggle theme"
+            >
+              {theme === 'dark' ? <SunIcon /> : <MoonIcon />}
+            </button>
           </div>
-          <div className="auth-input-group">
-            <label className="auth-input-label" htmlFor="auth-password">Password</label>
-            <input
-              id="auth-password"
-              type="password"
-              placeholder="••••••••"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              autoComplete={isLogin ? 'current-password' : 'new-password'}
-            />
+          <p className="auth-tagline">
+            {isLogin ? 'Welcome back.' : 'Start your journey.'}
+          </p>
+
+          <form onSubmit={handleSubmit} className="auth-form">
+            <div className="auth-input-group">
+              <label className="auth-input-label" htmlFor="auth-email">Email</label>
+              <input
+                id="auth-email"
+                type="email"
+                placeholder="you@example.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                autoComplete="email"
+              />
+            </div>
+            <div className="auth-input-group">
+              <label className="auth-input-label" htmlFor="auth-password">Password</label>
+              <input
+                id="auth-password"
+                type="password"
+                placeholder="••••••••"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                autoComplete={isLogin ? 'current-password' : 'new-password'}
+              />
+            </div>
+            <button type="submit" className="auth-submit">
+              {isLogin ? 'Sign in' : 'Create account'}
+            </button>
+          </form>
+
+          {error && <p className="quiet-error">{error}</p>}
+          {message && <p className="quiet-success">{message}</p>}
+
+          <div className="auth-switch">
+            <button
+              type="button"
+              onClick={() => {
+                setIsLogin(!isLogin);
+                setError(null);
+                setMessage(null);
+              }}
+              className="auth-switch-btn"
+            >
+              {isLogin ? 'No account yet? Create one' : 'Already have one? Sign in'}
+            </button>
           </div>
-          <button type="submit" className="auth-submit">
-            {isLogin ? 'Sign in' : 'Create account'}
-          </button>
-        </form>
-
-        {error && <p className="quiet-error">{error}</p>}
-        {message && <p className="quiet-success">{message}</p>}
-
-        <div className="auth-switch">
-          <button
-            type="button"
-            onClick={() => {
-              setIsLogin(!isLogin);
-              setError(null);
-              setMessage(null);
-            }}
-            className="auth-switch-btn"
-          >
-            {isLogin ? 'No account yet? Create one →' : 'Already have one? Sign in →'}
-          </button>
         </div>
       </div>
     </div>

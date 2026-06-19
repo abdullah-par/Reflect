@@ -84,7 +84,7 @@ export default function Landing({ theme, toggleTheme }: Props) {
                 A journal that remembers everything you've written
               </h1>
               <p className="lp-hero-desc">
-                Reflect connects your daily entries to your past writing, surfaces behavioral patterns over time, and helps you understand yourself better — privately.
+                Reflect connects your daily entries to your past writing, surfaces behavioral patterns over time, and helps you understand yourself better, privately.
               </p>
               <div className="lp-hero-actions">
                 <Link to="/auth" className="lp-btn-primary">Start for free</Link>
@@ -186,7 +186,7 @@ export default function Landing({ theme, toggleTheme }: Props) {
               <div className="lp-feature-text">
                 <h3 className="lp-feature-title">Pattern recognition across all your entries</h3>
                 <p className="lp-feature-desc">
-                  After each entry, Reflect runs analysis across your full writing history. It identifies recurring emotional patterns, behavioral loops, and themes you return to — automatically, without you doing anything.
+                  After each entry, Reflect runs analysis across your full writing history. It identifies recurring emotional patterns, behavioral loops, and themes you return to automatically, without you doing anything.
                 </p>
                 <ul className="lp-feature-list">
                   <li><CheckIcon /> Emotional tone tracking over time</li>
@@ -233,7 +233,7 @@ export default function Landing({ theme, toggleTheme }: Props) {
               <div className="lp-feature-text">
                 <h3 className="lp-feature-title">Your past entries, surfaced in context</h3>
                 <p className="lp-feature-desc">
-                  When you write about something, Reflect finds what you've written about it before — not just keywords, but semantic meaning. You'll see how the same thought has evolved over months.
+                  When you write about something, Reflect finds what you've written about it before, not just keywords, but semantic meaning. You'll see how the same thought has evolved over months.
                 </p>
                 <ul className="lp-feature-list">
                   <li><CheckIcon /> Semantic similarity matching</li>
@@ -266,7 +266,7 @@ export default function Landing({ theme, toggleTheme }: Props) {
               <div className="lp-feature-text">
                 <h3 className="lp-feature-title">AI-written summaries of any period</h3>
                 <p className="lp-feature-desc">
-                  Pick a date range — a week, a month, a year — and Reflect generates a coherent narrative summary of that period based on your actual entries. It reads like a chapter of your life.
+                  Pick a date range like a week, a month, or a year, and Reflect generates a coherent narrative summary of that period based on your actual entries. It reads like a chapter of your life.
                 </p>
                 <ul className="lp-feature-list">
                   <li><CheckIcon /> Configurable time periods</li>
@@ -278,7 +278,7 @@ export default function Landing({ theme, toggleTheme }: Props) {
                 <div className="lp-feature-card lp-chapter-card">
                   <div className="lp-card-label">Chapter · June 1–14</div>
                   <div className="lp-chapter-text">
-                    The first two weeks of June were shaped by the tension between ambition and exhaustion. You started the period with a clear goal — ship the feature — but by the end of the first week, fatigue had become the dominant note...
+                    The first two weeks of June were shaped by the tension between ambition and exhaustion. You started the period with a clear goal to ship the feature, but by the end of the first week, fatigue had become the dominant note...
                   </div>
                   <div className="lp-chapter-meta">
                     <span>14 entries · 3,200 words analyzed</span>
@@ -302,7 +302,7 @@ export default function Landing({ theme, toggleTheme }: Props) {
               <div className="lp-step-num">1</div>
               <div className="lp-step-body">
                 <h3>Write an entry</h3>
-                <p>Open Reflect and write. No prompts, no templates. Type or dictate. A few sentences or several paragraphs — it works either way.</p>
+                <p>Open Reflect and write. No prompts, no templates. Type or dictate. A few sentences or several paragraphs, it works either way.</p>
               </div>
             </div>
             <div className="lp-step">
@@ -323,7 +323,7 @@ export default function Landing({ theme, toggleTheme }: Props) {
               <div className="lp-step-num">4</div>
               <div className="lp-step-body">
                 <h3>Generate chapters</h3>
-                <p>At any point, generate a narrative summary of a period — useful for reflection, therapy prep, or simply understanding where you've been.</p>
+                <p>At any point, generate a narrative summary of a period, useful for reflection, therapy prep, or simply understanding where you've been.</p>
               </div>
             </div>
           </div>
@@ -348,7 +348,7 @@ export default function Landing({ theme, toggleTheme }: Props) {
               <ul className="lp-pricing-features">
                 <li><CheckIcon /> Unlimited journal entries</li>
                 <li><CheckIcon /> AI pattern analysis after every entry</li>
-                <li><CheckIcon /> Memory echo — past entry surfacing</li>
+                <li><CheckIcon /> Memory echo: past entry surfacing</li>
                 <li><CheckIcon /> Patterns dashboard (moods, people, topics)</li>
                 <li><CheckIcon /> Chapter generation for any date range</li>
                 <li><CheckIcon /> Voice input</li>

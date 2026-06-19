@@ -11,6 +11,7 @@ import {
   describeTonePresence,
   describePersonPresence,
 } from './utils/format';
+import { useSettings } from './useSettings';
 
 interface Props {
   theme: Theme;
@@ -44,7 +45,9 @@ function SunIcon() {
 export default function Dashboard({ theme, toggleTheme }: Props) {
   const [entries, setEntries] = useState<any[]>([]);
   const [summaries, setSummaries] = useState<any[]>([]);
-  const [activeTab, setActiveTab] = useState<'journal' | 'chapters' | 'mirror'>('journal');
+  const [activeTab, setActiveTab] = useState<'journal' | 'chapters' | 'mirror' | 'manuscript' | 'settings'>('journal');
+  const [selectedEntryId, setSelectedEntryId] = useState<string | null>(null);
+  const { settings, updateSettings } = useSettings();
 
   const [periodStart, setPeriodStart] = useState(() => {
     const d = new Date();
@@ -62,6 +65,12 @@ export default function Dashboard({ theme, toggleTheme }: Props) {
   useEffect(() => {
     loadData();
   }, []);
+
+  useEffect(() => {
+    if (activeTab === 'journal' && entries.length > 0 && !selectedEntryId) {
+      setSelectedEntryId(entries[0].id);
+    }
+  }, [activeTab, entries, selectedEntryId]);
 
   async function loadData() {
     try {
@@ -130,221 +139,280 @@ export default function Dashboard({ theme, toggleTheme }: Props) {
   const { relationships, patterns, toneCounts } = getAggregateInsights();
   const groupedEntries = groupEntriesByPeriod(entries);
 
+  const selectedEntry = entries.find(e => e.id === selectedEntryId) || entries[0];
+  const observerNote = selectedEntry?.insight ? buildObserverNote(selectedEntry.insight) : null;
+  const pastEchoes = selectedEntry?.insight?.relevant_past_entries ?? [];
+
   return (
-    <div className="app-shell">
-      {/* Header */}
-      <header className="app-header animate-up">
-        <Link to="/editor" className="app-wordmark">
-          Reflect
-        </Link>
-        <div className="app-header-actions">
-          <Link to="/editor" className="quiet-link">
-            ✦ Write
-          </Link>
+    <div className="ds-split">
+      {/* ───────────────── SIDEBAR ───────────────── */}
+      <aside className="ds-sidebar">
+        <div className="ds-sidebar-header">
+          <Link to="/" className="ds-logo">Reflect</Link>
+          <nav className="ds-nav">
+            <button
+              onClick={() => setActiveTab('journal')}
+              className={`ds-nav-item ${activeTab === 'journal' ? 'active' : ''}`}
+            >
+              Journal
+            </button>
+            <button
+              onClick={() => setActiveTab('chapters')}
+              className={`ds-nav-item ${activeTab === 'chapters' ? 'active' : ''}`}
+            >
+              Chapters
+            </button>
+            <button
+              onClick={() => setActiveTab('mirror')}
+              className={`ds-nav-item ${activeTab === 'mirror' ? 'active' : ''}`}
+            >
+              Patterns
+            </button>
+            <button
+              onClick={() => setActiveTab('manuscript')}
+              className={`ds-nav-item ${activeTab === 'manuscript' ? 'active' : ''}`}
+            >
+              Book
+            </button>
+            <button
+              onClick={() => setActiveTab('settings')}
+              className={`ds-nav-item ${activeTab === 'settings' ? 'active' : ''}`}
+            >
+              Settings
+            </button>
+          </nav>
+        </div>
+
+        {activeTab === 'journal' && groupedEntries.length > 0 && (
+          <>
+            <div className="ds-divider" />
+            <div className="ds-entry-list">
+              {groupedEntries.map(({ label, entries: periodEntries }) => (
+                <div key={label} style={{ marginBottom: '1rem' }}>
+                  <div className="ds-entry-date" style={{ padding: '0 12px', marginBottom: '6px' }}>{label}</div>
+                  {periodEntries.map(entry => (
+                    <button
+                      key={entry.id}
+                      onClick={() => setSelectedEntryId(entry.id)}
+                      className={`ds-entry-item ${selectedEntryId === entry.id ? 'active' : ''}`}
+                    >
+                      <div className="ds-entry-preview">{entry.content}</div>
+                    </button>
+                  ))}
+                </div>
+              ))}
+            </div>
+          </>
+        )}
+      </aside>
+
+      {/* ───────────────── MAIN PANE ───────────────── */}
+      <main className="ds-main">
+        <div style={{ position: 'absolute', top: '1.5rem', right: '2rem', display: 'flex', gap: '1rem', alignItems: 'center', zIndex: 10 }}>
           <button
             type="button"
             onClick={toggleTheme}
             className="theme-toggle-btn"
-            aria-label="Toggle theme"
-            title={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+            style={{ width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'transparent', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', color: 'var(--text-2)' }}
           >
             {theme === 'dark' ? <SunIcon /> : <MoonIcon />}
           </button>
-          <button type="button" onClick={handleLogout} className="quiet-link muted">
-            Sign out
-          </button>
+          <Link to="/editor" className="quiet-link">✦ Write</Link>
+          <button onClick={handleLogout} className="quiet-link muted">Sign out</button>
         </div>
-      </header>
 
-      {/* Navigation Tabs */}
-      <nav className="tabs-container animate-up delay-1">
-        <button
-          type="button"
-          onClick={() => setActiveTab('journal')}
-          className={`tab-btn ${activeTab === 'journal' ? 'active' : ''}`}
-        >
-          Journal
-        </button>
-        <button
-          type="button"
-          onClick={() => setActiveTab('chapters')}
-          className={`tab-btn ${activeTab === 'chapters' ? 'active' : ''}`}
-        >
-          Chapters
-        </button>
-        <button
-          type="button"
-          onClick={() => setActiveTab('mirror')}
-          className={`tab-btn ${activeTab === 'mirror' ? 'active' : ''}`}
-        >
-          Patterns
-        </button>
-      </nav>
+        <div className="ds-content-inner animate-up">
+          {activeTab === 'journal' && (
+            entries.length === 0 ? (
+              <div className="ds-empty-state">
+                <p>Nothing here yet.</p>
+                <Link to="/editor" className="quiet-link" style={{ marginTop: '1rem' }}>Start writing →</Link>
+              </div>
+            ) : selectedEntry ? (
+              <article>
+                <div className="ds-entry-header">
+                  <div className="ds-entry-date-large">{formatEntryTime(selectedEntry.created_at)}</div>
+                </div>
+                
+                <div className="ds-entry-text">{selectedEntry.content}</div>
 
-      {/* Journal Tab */}
-      {activeTab === 'journal' && (
-        <div className="animate-up">
-          {entries.length === 0 ? (
-            <p className="empty-state">
-              Nothing here yet.{' '}
-              <Link to="/editor" className="quiet-link">
-                Start writing →
-              </Link>
-            </p>
-          ) : (
-            groupedEntries.map(({ label, entries: periodEntries }) => (
-              <section key={label} className="notebook-period">
-                <h2 className="period-title">{label}</h2>
-                {periodEntries.map((entry) => {
-                  const observerNote = entry.insight ? buildObserverNote(entry.insight) : null;
-                  const pastEntries = entry.insight?.relevant_past_entries ?? [];
+                {settings.enableObserverNotes && observerNote && (
+                  <div className="observer-note">
+                    <div className="lp-mock-insight-label">Reflect Noticed</div>
+                    {observerNote}
+                  </div>
+                )}
 
-                  return (
-                    <article key={entry.id} className="notebook-entry">
-                      <time className="entry-time">{formatEntryTime(entry.created_at)}</time>
-                      <p className="entry-text">{entry.content}</p>
-
-                      {observerNote && <p className="observer-note">{observerNote}</p>}
-
-                      {pastEntries.map((past: any, idx: number) => {
-                        const echoDate = past.metadata?.created_at || past.created_at;
-                        return (
-                          <div key={idx} className="past-echo">
-                            <p className="past-echo-label">{formatPastEchoLabel(echoDate)}</p>
-                            <p className="past-echo-text">&ldquo;{past.content}&rdquo;</p>
-                          </div>
-                        );
-                      })}
-                    </article>
-                  );
-                })}
-              </section>
-            ))
-          )}
-        </div>
-      )}
-
-      {/* Chapters Tab */}
-      {activeTab === 'chapters' && (
-        <div className="animate-up">
-          <form onSubmit={handleCompileSummary} className="chapter-compile">
-            <p className="chapter-compile-intro">
-              Choose a span of time. An observer will read those entries and write a chapter of your life.
-            </p>
-            <div className="chapter-compile-fields">
-              <input
-                type="date"
-                value={periodStart}
-                onChange={(e) => setPeriodStart(e.target.value)}
-                aria-label="From"
-                required
-              />
-              <span className="chapter-compile-sep">to</span>
-              <input
-                type="date"
-                value={periodEnd}
-                onChange={(e) => setPeriodEnd(e.target.value)}
-                aria-label="To"
-                required
-              />
-              <select
-                value={summaryType}
-                onChange={(e) => setSummaryType(e.target.value as 'weekly' | 'monthly')}
-                aria-label="Scope"
-              >
-                <option value="weekly">a week</option>
-                <option value="monthly">a month</option>
-              </select>
-            </div>
-            <button type="submit" disabled={isCompiling} className="chapter-compile-btn">
-              {isCompiling ? (
-                <>
-                  <span style={{ display: 'inline-block', animation: 'breathe 1.5s infinite' }}>◌</span>
-                  Writing…
-                </>
-              ) : (
-                <>✦ Write chapter</>
-              )}
-            </button>
-            {compileMessage && <p className="quiet-success">{compileMessage}</p>}
-            {compileError && <p className="quiet-error">{compileError}</p>}
-          </form>
-
-          {summaries.length === 0 ? (
-            <p className="empty-state">No chapters yet.</p>
-          ) : (
-            summaries.map((summary) => (
-              <article key={summary.id} className="book-chapter animate-up">
-                <h2 className="book-chapter-title">
-                  {new Date(summary.period_start).toLocaleDateString(undefined, {
-                    month: 'long',
-                    day: 'numeric',
-                  })}
-                  {' — '}
-                  {new Date(summary.period_end).toLocaleDateString(undefined, {
-                    month: 'long',
-                    day: 'numeric',
-                    year: 'numeric',
-                  })}
-                </h2>
-                <div className="book-chapter-body">{summary.content}</div>
+                {settings.enableMemoryEcho && pastEchoes.length > 0 && (
+                  <div style={{ marginTop: '2rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                    {pastEchoes.map((past: any, idx: number) => {
+                      const echoDate = past.metadata?.created_at || past.created_at;
+                      return (
+                        <div key={idx} className="past-echo">
+                          <p className="past-echo-label">{formatPastEchoLabel(echoDate)}</p>
+                          <p className="past-echo-text">&ldquo;{past.content}&rdquo;</p>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
               </article>
-            ))
+            ) : null
+          )}
+
+          {activeTab === 'chapters' && (
+            <div>
+              <form onSubmit={handleCompileSummary} className="chapter-compile">
+                <p className="chapter-compile-intro">
+                  Choose a span of time. An observer will read those entries and write a chapter of your life.
+                </p>
+                <div className="chapter-compile-fields">
+                  <input type="date" value={periodStart} onChange={(e) => setPeriodStart(e.target.value)} required />
+                  <span className="chapter-compile-sep">to</span>
+                  <input type="date" value={periodEnd} onChange={(e) => setPeriodEnd(e.target.value)} required />
+                  <select value={summaryType} onChange={(e) => setSummaryType(e.target.value as 'weekly' | 'monthly')}>
+                    <option value="weekly">a week</option>
+                    <option value="monthly">a month</option>
+                  </select>
+                </div>
+                <button type="submit" disabled={isCompiling} className="chapter-compile-btn">
+                  {isCompiling ? 'Writing…' : '✦ Write chapter'}
+                </button>
+                {compileMessage && <p className="quiet-success">{compileMessage}</p>}
+                {compileError && <p className="quiet-error">{compileError}</p>}
+              </form>
+
+              {summaries.length === 0 ? (
+                <p className="empty-state">No chapters yet.</p>
+              ) : (
+                summaries.map((summary) => (
+                  <article key={summary.id} className="book-chapter animate-up">
+                    <h2 className="book-chapter-title">
+                      {new Date(summary.period_start).toLocaleDateString(undefined, { month: 'long', day: 'numeric' })}
+                      {' to '}
+                      {new Date(summary.period_end).toLocaleDateString(undefined, { month: 'long', day: 'numeric', year: 'numeric' })}
+                    </h2>
+                    <div className="book-chapter-body">{summary.content}</div>
+                  </article>
+                ))
+              )}
+            </div>
+          )}
+
+          {activeTab === 'mirror' && (
+            <div>
+              <section className="mirror-section">
+                <h2 className="mirror-section-title">What keeps showing up</h2>
+                {Object.keys(patterns).length === 0 ? (
+                  <p className="mirror-empty">Keep writing. Patterns emerge slowly.</p>
+                ) : (
+                  <ul className="mirror-list">
+                    {Object.entries(patterns).map(([name, count]) => (
+                      <li key={name} className="mirror-list-item">{describePatternOccurrence(name, count)}</li>
+                    ))}
+                  </ul>
+                )}
+              </section>
+
+              <section className="mirror-section">
+                <h2 className="mirror-section-title">People and places</h2>
+                {Object.keys(relationships).length === 0 ? (
+                  <p className="mirror-empty">Names and places from your entries will gather here over time.</p>
+                ) : (
+                  <ul className="mirror-list">
+                    {Object.entries(relationships).map(([name, stats]) => (
+                      <li key={name} className="mirror-list-item">{describePersonPresence(name, stats)}</li>
+                    ))}
+                  </ul>
+                )}
+              </section>
+
+              <section className="mirror-section">
+                <h2 className="mirror-section-title">Emotional weather</h2>
+                {Object.keys(toneCounts).length === 0 ? (
+                  <p className="mirror-empty">Your moods will appear here as you write.</p>
+                ) : (
+                  <ul className="mirror-list">
+                    {Object.entries(toneCounts).map(([tone, count]) => (
+                      <li key={tone} className="mirror-list-item">{describeTonePresence(tone, count)}</li>
+                    ))}
+                  </ul>
+                )}
+              </section>
+            </div>
+          )}
+
+          {activeTab === 'manuscript' && (
+            <div>
+              <div className="manuscript-controls">
+                <p className="chapter-compile-intro">
+                  Bundle your entire journal chronologically into a beautifully typeset book. Ready to print or export as PDF.
+                </p>
+                <button type="button" onClick={() => window.print()} className="chapter-compile-btn">
+                  ✦ Print / Export to PDF
+                </button>
+              </div>
+              <div className="manuscript-preview print-area">
+                <h1 className="manuscript-title">My Reflections</h1>
+                {groupedEntries.map(({ label, entries: periodEntries }) => (
+                  <div key={label} className="manuscript-chapter">
+                    <h2 className="manuscript-chapter-title">{label}</h2>
+                    <div className="manuscript-chapter-content">
+                      {periodEntries.map(entry => (
+                        <div key={entry.id} className="manuscript-entry">
+                          <span className="manuscript-date">{formatEntryTime(entry.created_at)}: </span>
+                          {entry.content}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {activeTab === 'settings' && (
+            <div className="settings-panel">
+              <section className="notebook-period">
+                <h2 className="period-title">Typography</h2>
+                <div className="settings-group">
+                  <label className="settings-label">Font Style</label>
+                  <select
+                    className="settings-select"
+                    value={settings.fontStyle}
+                    onChange={(e) => updateSettings({ fontStyle: e.target.value as any })}
+                  >
+                    <option value="editorial">Editorial (Serif)</option>
+                    <option value="typewriter">Typewriter (Monospace)</option>
+                    <option value="sans">Modern (Sans-serif)</option>
+                  </select>
+                </div>
+              </section>
+              
+              <section className="notebook-period" style={{ marginTop: '3rem' }}>
+                <h2 className="period-title">AI Preferences</h2>
+                <div className="settings-group">
+                  <label className="settings-toggle">
+                    <input type="checkbox" checked={settings.enableObserverNotes} onChange={(e) => updateSettings({ enableObserverNotes: e.target.checked })} />
+                    <span className="settings-toggle-text">Show Observer Notes after entries</span>
+                  </label>
+                  <label className="settings-toggle">
+                    <input type="checkbox" checked={settings.enableMemoryEcho} onChange={(e) => updateSettings({ enableMemoryEcho: e.target.checked })} />
+                    <span className="settings-toggle-text">Show Memory Echoes (Semantic past matches)</span>
+                  </label>
+                  <label className="settings-toggle">
+                    <input type="checkbox" checked={settings.enablePatterns} onChange={(e) => updateSettings({ enablePatterns: e.target.checked })} />
+                    <span className="settings-toggle-text">Track emotional & behavioral patterns</span>
+                  </label>
+                </div>
+                <p className="quiet-error" style={{ marginTop: '1rem', fontSize: '0.85rem' }}>
+                  Note: Disabling these hides them from the UI to provide a quieter writing experience.
+                </p>
+              </section>
+            </div>
           )}
         </div>
-      )}
-
-      {/* Patterns / Mirror Tab */}
-      {activeTab === 'mirror' && (
-        <div className="animate-up">
-          <section className="mirror-section">
-            <h2 className="mirror-section-title">What keeps showing up</h2>
-            {Object.keys(patterns).length === 0 ? (
-              <p className="mirror-empty">Keep writing. Patterns emerge slowly.</p>
-            ) : (
-              <ul className="mirror-list">
-                {Object.entries(patterns).map(([name, count]) => (
-                  <li key={name} className="mirror-list-item">
-                    {describePatternOccurrence(name, count)}
-                  </li>
-                ))}
-              </ul>
-            )}
-          </section>
-
-          <section className="mirror-section">
-            <h2 className="mirror-section-title">People and places</h2>
-            {Object.keys(relationships).length === 0 ? (
-              <p className="mirror-empty">
-                Names and places from your entries will gather here over time.
-              </p>
-            ) : (
-              <ul className="mirror-list">
-                {Object.entries(relationships).map(([name, stats]) => (
-                  <li key={name} className="mirror-list-item">
-                    {describePersonPresence(name, stats)}
-                  </li>
-                ))}
-              </ul>
-            )}
-          </section>
-
-          <section className="mirror-section">
-            <h2 className="mirror-section-title">Emotional weather</h2>
-            {Object.keys(toneCounts).length === 0 ? (
-              <p className="mirror-empty">Your moods will appear here as you write.</p>
-            ) : (
-              <ul className="mirror-list">
-                {Object.entries(toneCounts).map(([tone, count]) => (
-                  <li key={tone} className="mirror-list-item">
-                    {describeTonePresence(tone, count)}
-                  </li>
-                ))}
-              </ul>
-            )}
-          </section>
-        </div>
-      )}
+      </main>
     </div>
   );
 }
