@@ -88,3 +88,36 @@ def process_entry(new_entry_content: str, user_id: int):
     )
 
     return insight_data, retrieved_docs
+
+NARRATIVE_PROMPT = """
+You are a wise, observant biographer reading a person's journal entries for a recent period.
+Your job is to compile these entries into a short, beautifully written narrative summary.
+It should not be a list of bullet points, but rather a story arc of their period: what happened, what emotional patterns or loops showed up, how their mood evolved, and what shifted or stayed the same.
+The tone must be that of a wise, observant friend - never clinical, never robotic, never preachy. It should read like a chapter of a personal book.
+
+Journal Entries:
+{entries_content}
+
+Write the narrative chapter now:
+"""
+
+narrative_prompt_template = PromptTemplate(template=NARRATIVE_PROMPT, input_variables=["entries_content"])
+
+def generate_narrative_summary(entries: list) -> str:
+    if not entries:
+        return "No entries recorded during this period to summarize."
+        
+    entries_formatted = []
+    for entry in entries:
+        created_str = entry.created_at.strftime("%Y-%m-%d %H:%M")
+        entries_formatted.append(f"Date: {created_str}\nContent: {entry.content}")
+        
+    entries_content = "\n\n---\n\n".join(entries_formatted)
+    
+    try:
+        chain = narrative_prompt_template | llm
+        response = chain.invoke({"entries_content": entries_content})
+        return response.content.strip()
+    except Exception as e:
+        print("LLM Error in narrative summary:", e)
+        return "Could not generate summary due to an error. Please try again."

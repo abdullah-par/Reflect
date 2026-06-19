@@ -1,54 +1,299 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { fetchWithAuth } from './api';
+import { fetchWithAuth, fetchSummaries, generateSummary } from './api';
+import {
+  groupEntriesByPeriod,
+  formatEntryTime,
+  formatPastEchoLabel,
+  buildObserverNote,
+  describePatternOccurrence,
+  describeTonePresence,
+  describePersonPresence,
+} from './utils/format';
 
 export default function Dashboard() {
   const [entries, setEntries] = useState<any[]>([]);
+  const [summaries, setSummaries] = useState<any[]>([]);
+  const [activeTab, setActiveTab] = useState<'journal' | 'chapters' | 'mirror'>('journal');
+
+  const [periodStart, setPeriodStart] = useState(() => {
+    const d = new Date();
+    d.setDate(d.getDate() - 7);
+    return d.toISOString().split('T')[0];
+  });
+  const [periodEnd, setPeriodEnd] = useState(() => new Date().toISOString().split('T')[0]);
+  const [summaryType, setSummaryType] = useState<'weekly' | 'monthly'>('weekly');
+  const [isCompiling, setIsCompiling] = useState(false);
+  const [compileMessage, setCompileMessage] = useState<string | null>(null);
+  const [compileError, setCompileError] = useState<string | null>(null);
+
   const navigate = useNavigate();
 
   useEffect(() => {
-    async function loadEntries() {
+    loadData();
+  }, []);
+
+  async function loadData() {
+    try {
       const res = await fetchWithAuth('/entries/');
       if (res.ok) {
-        const data = await res.json();
-        setEntries(data);
+        setEntries(await res.json());
       }
+      setSummaries(await fetchSummaries());
+    } catch (err) {
+      console.error('Error loading data:', err);
     }
-    loadEntries();
-  }, []);
+  }
 
   const handleLogout = () => {
     localStorage.removeItem('antigravity_token');
     navigate('/');
   };
 
+  const handleCompileSummary = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsCompiling(true);
+    setCompileMessage(null);
+    setCompileError(null);
+    try {
+      const startIso = new Date(periodStart + 'T00:00:00').toISOString();
+      const endIso = new Date(periodEnd + 'T23:59:59').toISOString();
+      const newSummary = await generateSummary(startIso, endIso, summaryType);
+      setSummaries((prev) => [newSummary, ...prev]);
+      setCompileMessage('Your chapter is ready.');
+    } catch (err: any) {
+      setCompileError(err.message || 'Could not write that chapter. Try a different range.');
+    } finally {
+      setIsCompiling(false);
+    }
+  };
+
+  const getAggregateInsights = () => {
+    const relationships: Record<string, { positive: number; negative: number; neutral: number }> = {};
+    const patterns: Record<string, number> = {};
+    const toneCounts: Record<string, number> = {};
+
+    entries.forEach((entry) => {
+      if (!entry.insight) return;
+      const ins = entry.insight;
+      if (ins.pattern_name && ins.pattern_name !== 'Unknown' && ins.pattern_name !== 'Analysis Pending') {
+        patterns[ins.pattern_name] = (patterns[ins.pattern_name] || 0) + 1;
+      }
+      if (ins.emotional_tone && ins.emotional_tone !== 'Unknown') {
+        toneCounts[ins.emotional_tone] = (toneCounts[ins.emotional_tone] || 0) + 1;
+      }
+      if (ins.relationships_tracked) {
+        Object.entries(ins.relationships_tracked).forEach(([name, impact]: [string, any]) => {
+          if (!relationships[name]) {
+            relationships[name] = { positive: 0, negative: 0, neutral: 0 };
+          }
+          if (impact === 'positive') relationships[name].positive += 1;
+          else if (impact === 'negative') relationships[name].negative += 1;
+          else relationships[name].neutral += 1;
+        });
+      }
+    });
+
+    return { relationships, patterns, toneCounts };
+  };
+
+  const { relationships, patterns, toneCounts } = getAggregateInsights();
+  const groupedEntries = groupEntriesByPeriod(entries);
+
   return (
-    <div style={{ maxWidth: '800px', margin: '0 auto', padding: '40px 20px' }}>
-      <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '40px' }}>
-        <h1>Antigravity Dashboard</h1>
-        <div>
-          <Link to="/editor" style={{ marginRight: '20px', padding: '10px 20px', backgroundColor: '#333', color: 'white', textDecoration: 'none', borderRadius: '4px' }}>
-            New Entry
+    <div className="app-shell">
+      <header className="app-header">
+        <Link to="/editor" className="app-wordmark">
+          Reflect
+        </Link>
+        <div className="app-header-actions">
+          <Link to="/editor" className="quiet-link">
+            write
           </Link>
-          <button onClick={handleLogout} style={{ padding: '10px 20px', cursor: 'pointer' }}>Logout</button>
+          <button type="button" onClick={handleLogout} className="quiet-link muted">
+            sign out
+          </button>
         </div>
       </header>
-      
-      <div>
-        <h2>Your Entries</h2>
-        {entries.length === 0 ? (
-          <p>No entries yet. Start journaling!</p>
-        ) : (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-            {entries.map(entry => (
-              <div key={entry.id} style={{ border: '1px solid #ccc', padding: '20px', borderRadius: '8px' }}>
-                <p style={{ fontSize: '0.8em', color: '#666' }}>{new Date(entry.created_at).toLocaleString()}</p>
-                <p style={{ marginTop: '10px', whiteSpace: 'pre-wrap' }}>{entry.content}</p>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
+
+      <nav className="tabs-container">
+        <button
+          type="button"
+          onClick={() => setActiveTab('journal')}
+          className={`tab-btn ${activeTab === 'journal' ? 'active' : ''}`}
+        >
+          Journal
+        </button>
+        <button
+          type="button"
+          onClick={() => setActiveTab('chapters')}
+          className={`tab-btn ${activeTab === 'chapters' ? 'active' : ''}`}
+        >
+          Chapters
+        </button>
+        <button
+          type="button"
+          onClick={() => setActiveTab('mirror')}
+          className={`tab-btn ${activeTab === 'mirror' ? 'active' : ''}`}
+        >
+          Patterns
+        </button>
+      </nav>
+
+      {activeTab === 'journal' && (
+        <div className="animate-up">
+          {entries.length === 0 ? (
+            <p className="empty-state">
+              Nothing here yet.{' '}
+              <Link to="/editor" className="quiet-link">
+                Start writing
+              </Link>
+            </p>
+          ) : (
+            groupedEntries.map(({ label, entries: periodEntries }) => (
+              <section key={label} className="notebook-period">
+                <h2 className="period-title">{label}</h2>
+                {periodEntries.map((entry) => {
+                  const observerNote = entry.insight ? buildObserverNote(entry.insight) : null;
+                  const pastEntries = entry.insight?.relevant_past_entries ?? [];
+
+                  return (
+                    <article key={entry.id} className="notebook-entry">
+                      <time className="entry-time">{formatEntryTime(entry.created_at)}</time>
+                      <p className="entry-text">{entry.content}</p>
+
+                      {observerNote && <p className="observer-note">{observerNote}</p>}
+
+                      {pastEntries.map((past: any, idx: number) => {
+                        const echoDate = past.metadata?.created_at || past.created_at;
+                        return (
+                          <div key={idx} className="past-echo">
+                            <p className="past-echo-label">{formatPastEchoLabel(echoDate)}</p>
+                            <p className="past-echo-text">&ldquo;{past.content}&rdquo;</p>
+                          </div>
+                        );
+                      })}
+                    </article>
+                  );
+                })}
+              </section>
+            ))
+          )}
+        </div>
+      )}
+
+      {activeTab === 'chapters' && (
+        <div className="animate-up">
+          <form onSubmit={handleCompileSummary} className="chapter-compile">
+            <p className="chapter-compile-intro">
+              Choose a span of time. An observer will read those entries and write a chapter of your life.
+            </p>
+            <div className="chapter-compile-fields">
+              <input
+                type="date"
+                value={periodStart}
+                onChange={(e) => setPeriodStart(e.target.value)}
+                aria-label="From"
+                required
+              />
+              <span className="chapter-compile-sep">to</span>
+              <input
+                type="date"
+                value={periodEnd}
+                onChange={(e) => setPeriodEnd(e.target.value)}
+                aria-label="To"
+                required
+              />
+              <select
+                value={summaryType}
+                onChange={(e) => setSummaryType(e.target.value as 'weekly' | 'monthly')}
+                aria-label="Scope"
+              >
+                <option value="weekly">a week</option>
+                <option value="monthly">a month</option>
+              </select>
+            </div>
+            <button type="submit" disabled={isCompiling} className="quiet-link chapter-compile-btn">
+              {isCompiling ? 'writing&hellip;' : 'write chapter'}
+            </button>
+            {compileMessage && <p className="quiet-success">{compileMessage}</p>}
+            {compileError && <p className="quiet-error">{compileError}</p>}
+          </form>
+
+          {summaries.length === 0 ? (
+            <p className="empty-state">No chapters yet.</p>
+          ) : (
+            summaries.map((summary) => (
+              <article key={summary.id} className="book-chapter animate-up">
+                <h2 className="book-chapter-title">
+                  {new Date(summary.period_start).toLocaleDateString(undefined, {
+                    month: 'long',
+                    day: 'numeric',
+                  })}
+                  {' — '}
+                  {new Date(summary.period_end).toLocaleDateString(undefined, {
+                    month: 'long',
+                    day: 'numeric',
+                    year: 'numeric',
+                  })}
+                </h2>
+                <div className="book-chapter-body">{summary.content}</div>
+              </article>
+            ))
+          )}
+        </div>
+      )}
+
+      {activeTab === 'mirror' && (
+        <div className="animate-up">
+          <section className="mirror-section">
+            <h2 className="mirror-section-title">What keeps showing up</h2>
+            {Object.keys(patterns).length === 0 ? (
+              <p className="mirror-empty">Keep writing. Patterns emerge slowly.</p>
+            ) : (
+              <ul className="mirror-list">
+                {Object.entries(patterns).map(([name, count]) => (
+                  <li key={name} className="mirror-list-item">
+                    {describePatternOccurrence(name, count)}
+                  </li>
+                ))}
+              </ul>
+            )}
+          </section>
+
+          <section className="mirror-section">
+            <h2 className="mirror-section-title">People and places</h2>
+            {Object.keys(relationships).length === 0 ? (
+              <p className="mirror-empty">
+                Names and places from your entries will gather here over time.
+              </p>
+            ) : (
+              <ul className="mirror-list">
+                {Object.entries(relationships).map(([name, stats]) => (
+                  <li key={name} className="mirror-list-item">
+                    {describePersonPresence(name, stats)}
+                  </li>
+                ))}
+              </ul>
+            )}
+          </section>
+
+          <section className="mirror-section">
+            <h2 className="mirror-section-title">Emotional weather</h2>
+            {Object.keys(toneCounts).length === 0 ? (
+              <p className="mirror-empty">Your moods will appear here as you write.</p>
+            ) : (
+              <ul className="mirror-list">
+                {Object.entries(toneCounts).map(([tone, count]) => (
+                  <li key={tone} className="mirror-list-item">
+                    {describeTonePresence(tone, count)}
+                  </li>
+                ))}
+              </ul>
+            )}
+          </section>
+        </div>
+      )}
     </div>
   );
 }

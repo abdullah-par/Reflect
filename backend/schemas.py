@@ -8,10 +8,28 @@ class EntryInsightBase(BaseModel):
     emotional_tone: Optional[str] = None
     relationships_tracked: Optional[Dict[str, Any]] = None
     takeaway: Optional[str] = None
+    relevant_past_entries: Optional[List[Any]] = None
 
 class EntryInsight(EntryInsightBase):
     id: int
     entry_id: int
+
+    class Config:
+        from_attributes = True
+
+class NarrativeSummaryBase(BaseModel):
+    period_start: datetime.datetime
+    period_end: datetime.datetime
+    summary_type: str
+    content: str
+
+class NarrativeSummaryCreate(NarrativeSummaryBase):
+    pass
+
+class NarrativeSummary(NarrativeSummaryBase):
+    id: int
+    user_id: int
+    created_at: datetime.datetime
 
     class Config:
         from_attributes = True

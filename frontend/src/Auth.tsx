@@ -1,18 +1,23 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { API_URL } from './api';
 
 export default function Auth() {
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [error, setError] = useState<string | null>(null);
+  const [message, setMessage] = useState<string | null>(null);
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError(null);
+    setMessage(null);
+
     if (isLogin) {
       const formData = new FormData();
-      formData.append('username', email); // OAuth2 requires 'username'
+      formData.append('username', email);
       formData.append('password', password);
 
       const res = await fetch(`${API_URL}/token`, {
@@ -25,7 +30,7 @@ export default function Auth() {
         localStorage.setItem('antigravity_token', data.access_token);
         navigate('/app');
       } else {
-        alert('Login failed');
+        setError('Could not sign in. Check your details and try again.');
       }
     } else {
       const res = await fetch(`${API_URL}/register`, {
@@ -36,42 +41,54 @@ export default function Auth() {
 
       if (res.ok) {
         setIsLogin(true);
-        alert('Registration successful, please login');
+        setMessage('Account created. You can sign in now.');
       } else {
-        alert('Registration failed');
+        setError('Could not create account. Try a different email.');
       }
     }
   };
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginTop: '100px' }}>
-      <h2>{isLogin ? 'Login' : 'Register'} to Antigravity</h2>
-      <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '10px', width: '300px' }}>
-        <input 
-          type="email" 
-          placeholder="Email" 
-          value={email} 
-          onChange={(e) => setEmail(e.target.value)} 
-          required 
-          style={{ padding: '10px' }}
+    <div className="auth-page">
+      <Link to="/" className="auth-wordmark">
+        Reflect
+      </Link>
+
+      <form onSubmit={handleSubmit} className="auth-form">
+        <input
+          type="email"
+          placeholder="email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          required
+          autoComplete="email"
         />
-        <input 
-          type="password" 
-          placeholder="Password" 
-          value={password} 
-          onChange={(e) => setPassword(e.target.value)} 
-          required 
-          style={{ padding: '10px' }}
+        <input
+          type="password"
+          placeholder="password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          required
+          autoComplete={isLogin ? 'current-password' : 'new-password'}
         />
-        <button type="submit" style={{ padding: '10px', cursor: 'pointer' }}>
-          {isLogin ? 'Login' : 'Register'}
+        <button type="submit" className="auth-submit">
+          {isLogin ? 'enter' : 'create account'}
         </button>
       </form>
-      <button 
-        onClick={() => setIsLogin(!isLogin)} 
-        style={{ marginTop: '20px', background: 'none', border: 'none', color: 'blue', cursor: 'pointer' }}
+
+      {error && <p className="quiet-error">{error}</p>}
+      {message && <p className="quiet-success">{message}</p>}
+
+      <button
+        type="button"
+        onClick={() => {
+          setIsLogin(!isLogin);
+          setError(null);
+          setMessage(null);
+        }}
+        className="quiet-link muted"
       >
-        {isLogin ? 'Need an account? Register' : 'Already have an account? Login'}
+        {isLogin ? 'need an account?' : 'already have one?'}
       </button>
     </div>
   );

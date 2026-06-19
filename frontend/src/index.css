@@ -439,3 +439,542 @@ h1, h2, h3 {
   .journal-mockup { padding: 1.5rem; }
   .nav-container { padding: 0 1.5rem; }
 }
+
+/* ===== PREMIUM REFLECT STYLES ===== */
+
+/* Watermark date */
+.watermark-date {
+  font-family: 'Lora', serif;
+  font-style: italic;
+  font-size: 0.9rem;
+  color: var(--text-tertiary);
+  margin-bottom: 2rem;
+  user-select: none;
+}
+
+/* Voice/Mic button - extremely quiet and minimal */
+.mic-btn {
+  background: transparent;
+  border: none;
+  color: var(--text-secondary);
+  opacity: 0.4;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.2s, transform 0.2s;
+  padding: 8px;
+}
+
+.mic-btn:hover {
+  opacity: 0.8;
+}
+
+.mic-btn.active {
+  color: #cc4444;
+  opacity: 1;
+  animation: pulse-opacity 1.5s infinite;
+}
+
+@keyframes pulse-opacity {
+  0%, 100% { opacity: 0.6; }
+  50% { opacity: 1; }
+}
+
+/* Minimalist navigation tabs */
+.tabs-container {
+  display: flex;
+  gap: 2rem;
+  margin-bottom: 3rem;
+  margin-top: 1rem;
+}
+
+.tab-btn {
+  font-family: 'Inter', sans-serif;
+  font-size: 0.85rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--text-tertiary);
+  background: none;
+  border: none;
+  padding: 5px 0;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.tab-btn:hover, .tab-btn.active {
+  color: var(--text-primary);
+}
+
+/* Notebook layout (Flipping back through pages) */
+.notebook-period {
+  margin-bottom: 4rem;
+}
+
+.period-title {
+  font-family: 'Lora', serif;
+  font-size: 1.1rem;
+  font-style: italic;
+  color: var(--text-secondary);
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 0.5rem;
+  margin-bottom: 2rem;
+}
+
+.notebook-entry {
+  margin-bottom: 3.5rem;
+}
+
+.entry-time {
+  font-family: 'Inter', sans-serif;
+  font-size: 0.78rem;
+  color: var(--text-tertiary);
+  margin-bottom: 0.5rem;
+}
+
+.entry-text {
+  font-family: 'Lora', Georgia, serif;
+  font-size: 1.15rem;
+  line-height: 1.8;
+  color: var(--text-primary);
+  white-space: pre-wrap;
+}
+
+/* The Observer Note (The AI's voice responding to what was written) */
+.observer-note {
+  font-family: 'Lora', Georgia, serif;
+  font-style: italic;
+  font-size: 1.05rem;
+  line-height: 1.8;
+  color: var(--text-secondary);
+  padding-left: 1.5rem;
+  border-left: 2px solid var(--border);
+  margin-top: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+/* The Past Entry Callback (Quiet echoes) */
+.past-echo {
+  margin-top: 2rem;
+  padding-left: 1.5rem;
+  border-left: 1px dashed var(--border);
+}
+
+.past-echo-label {
+  font-family: 'Lora', Georgia, serif;
+  font-size: 0.85rem;
+  font-style: italic;
+  color: var(--text-tertiary);
+  margin-bottom: 0.5rem;
+}
+
+.past-echo-text {
+  font-family: 'Lora', Georgia, serif;
+  font-size: 0.95rem;
+  line-height: 1.7;
+  color: var(--text-secondary);
+  font-style: italic;
+}
+
+/* Chapters/Narratives in a book style */
+.book-chapter {
+  margin-bottom: 5rem;
+}
+
+.book-chapter-title {
+  font-family: 'Lora', Georgia, serif;
+  font-size: 1.8rem;
+  font-weight: 400;
+  text-align: center;
+  margin-bottom: 3rem;
+}
+
+.book-chapter-body {
+  font-family: 'Lora', Georgia, serif;
+  font-size: 1.15rem;
+  line-height: 1.9;
+  color: var(--text-primary);
+  white-space: pre-wrap;
+  max-width: 650px;
+  margin: 0 auto;
+}
+
+/* Mental Mirror - reflective lists */
+.mirror-section {
+  margin-bottom: 3rem;
+}
+
+.mirror-section-title {
+  font-family: 'Inter', sans-serif;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-tertiary);
+  margin-bottom: 1.5rem;
+}
+
+.mirror-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.mirror-list-item {
+  font-family: 'Lora', serif;
+  font-size: 1.05rem;
+  line-height: 1.7;
+  color: var(--text-primary);
+}
+
+.mirror-list-sub {
+  font-family: 'Inter', sans-serif;
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+}
+
+/* Clean, silent saving loader */
+.silent-saving {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
+
+.silent-saving-text {
+  font-family: 'Lora', Georgia, serif;
+  font-style: italic;
+  font-size: 1.25rem;
+  color: var(--text-secondary);
+  animation: breathe 3s ease-in-out infinite;
+}
+
+@keyframes breathe {
+  0%, 100% { opacity: 0.4; }
+  50% { opacity: 1; }
+}
+
+/* ===== APP SHELL ===== */
+
+.app-shell {
+  max-width: 680px;
+  margin: 0 auto;
+  padding: 3rem 1.5rem 5rem;
+}
+
+.app-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 3rem;
+}
+
+.app-wordmark {
+  font-family: 'Lora', serif;
+  font-size: 1.25rem;
+  font-weight: 400;
+  font-style: italic;
+  color: var(--text-primary);
+  text-decoration: none;
+}
+
+.app-header-actions {
+  display: flex;
+  gap: 1.5rem;
+  align-items: center;
+}
+
+/* ===== QUIET UI ELEMENTS ===== */
+
+.quiet-link {
+  background: none;
+  border: none;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  cursor: pointer;
+  text-decoration: none;
+  padding: 0;
+  transition: color 0.15s;
+}
+
+.quiet-link:hover {
+  color: var(--text-primary);
+}
+
+.quiet-link.muted {
+  color: var(--text-tertiary);
+}
+
+.quiet-error {
+  font-family: 'Lora', serif;
+  font-style: italic;
+  font-size: 0.9rem;
+  color: var(--text-tertiary);
+  margin-top: 1rem;
+}
+
+.quiet-success {
+  font-family: 'Lora', serif;
+  font-style: italic;
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  margin-top: 1rem;
+}
+
+.empty-state {
+  font-family: 'Lora', serif;
+  font-style: italic;
+  font-size: 1rem;
+  color: var(--text-tertiary);
+  text-align: center;
+  padding: 4rem 1rem;
+}
+
+.mirror-empty {
+  font-family: 'Lora', serif;
+  font-style: italic;
+  font-size: 1rem;
+  color: var(--text-tertiary);
+  line-height: 1.7;
+}
+
+/* ===== EDITOR ===== */
+
+.editor-page {
+  max-width: 680px;
+  margin: 0 auto;
+  padding: 2rem 1.5rem;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.editor-chrome {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  opacity: 0.5;
+  transition: opacity 0.2s;
+}
+
+.editor-page:focus-within .editor-chrome,
+.editor-chrome:hover {
+  opacity: 1;
+}
+
+.editor-back {
+  background: none;
+  border: none;
+  font-size: 1.1rem;
+  color: var(--text-tertiary);
+  cursor: pointer;
+  padding: 4px 8px;
+  transition: color 0.15s;
+}
+
+.editor-back:hover {
+  color: var(--text-secondary);
+}
+
+.editor-actions {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.editor-done {
+  background: none;
+  border: none;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.85rem;
+  color: var(--text-tertiary);
+  cursor: pointer;
+  padding: 4px 8px;
+  transition: color 0.15s;
+}
+
+.editor-done:hover {
+  color: var(--text-primary);
+}
+
+.editor-done:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.editor-textarea {
+  flex: 1;
+  width: 100%;
+  padding: 0;
+  font-size: 1.2rem;
+  border: none;
+  outline: none;
+  resize: none;
+  background: transparent;
+  font-family: 'Lora', Georgia, serif;
+  line-height: 1.8;
+  color: var(--text-primary);
+  min-height: 60vh;
+}
+
+.voice-hint {
+  font-family: 'Lora', serif;
+  font-style: italic;
+  font-size: 0.85rem;
+  color: var(--text-tertiary);
+  margin-bottom: 0.5rem;
+}
+
+/* ===== INSIGHT VIEW ===== */
+
+.insight-view {
+  max-width: 680px;
+  margin: 0 auto;
+  padding: 4rem 1.5rem 5rem;
+  min-height: 100vh;
+}
+
+.insight-view-inner {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.insight-actions {
+  margin-top: 3rem;
+}
+
+/* ===== CHAPTERS COMPILE ===== */
+
+.chapter-compile {
+  margin-bottom: 4rem;
+  padding-bottom: 2rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.chapter-compile-intro {
+  font-family: 'Lora', serif;
+  font-style: italic;
+  font-size: 1rem;
+  color: var(--text-secondary);
+  line-height: 1.7;
+  margin-bottom: 1.5rem;
+}
+
+.chapter-compile-fields {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.chapter-compile-fields input,
+.chapter-compile-fields select {
+  font-family: 'Inter', sans-serif;
+  font-size: 0.85rem;
+  padding: 6px 10px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: transparent;
+  color: var(--text-primary);
+}
+
+.chapter-compile-sep {
+  font-family: 'Lora', serif;
+  font-style: italic;
+  font-size: 0.9rem;
+  color: var(--text-tertiary);
+}
+
+.chapter-compile-btn {
+  display: inline-block;
+  margin-top: 0.5rem;
+}
+
+/* ===== AUTH & LANDING ===== */
+
+.auth-page {
+  max-width: 320px;
+  margin: 0 auto;
+  padding: 6rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2rem;
+  min-height: 100vh;
+}
+
+.auth-wordmark {
+  font-family: 'Lora', serif;
+  font-size: 1.5rem;
+  font-style: italic;
+  color: var(--text-primary);
+  text-decoration: none;
+}
+
+.auth-form {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.auth-form input {
+  font-family: 'Inter', sans-serif;
+  font-size: 0.9rem;
+  padding: 10px 0;
+  border: none;
+  border-bottom: 1px solid var(--border);
+  background: transparent;
+  color: var(--text-primary);
+  outline: none;
+}
+
+.auth-form input::placeholder {
+  color: var(--text-tertiary);
+}
+
+.auth-submit {
+  background: none;
+  border: none;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  cursor: pointer;
+  padding: 10px 0;
+  margin-top: 0.5rem;
+  text-align: left;
+  transition: color 0.15s;
+}
+
+.auth-submit:hover {
+  color: var(--text-primary);
+}
+
+.landing-minimal {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  padding: 2rem;
+}
+
+.landing-title {
+  font-family: 'Lora', serif;
+  font-size: 2rem;
+  font-weight: 400;
+  font-style: italic;
+}
+
+.landing-subtitle {
+  font-family: 'Lora', serif;
+  font-style: italic;
+  font-size: 1rem;
+  color: var(--text-secondary);
+  margin-bottom: 1.5rem;
+}

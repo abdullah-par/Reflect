@@ -34,5 +34,17 @@ class EntryInsight(Base):
     emotional_tone = Column(String, nullable=True)
     relationships_tracked = Column(JSON, nullable=True)
     takeaway = Column(Text, nullable=True)
+    relevant_past_entries = Column(JSON, nullable=True)
 
     entry = relationship("JournalEntry", back_populates="insight")
+
+class NarrativeSummary(Base):
+    __tablename__ = "narrative_summaries"
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"))
+    period_start = Column(DateTime, nullable=False)
+    period_end = Column(DateTime, nullable=False)
+    summary_type = Column(String, nullable=False)  # "weekly" or "monthly"
+    content = Column(Text, nullable=False)
+    created_at = Column(DateTime, default=datetime.datetime.utcnow)

@@ -16,7 +16,7 @@ def create_user(db: Session, user: schemas.UserCreate):
     return db_user
 
 def get_entries(db: Session, user_id: int, skip: int = 0, limit: int = 100):
-    return db.query(models.JournalEntry).filter(models.JournalEntry.owner_id == user_id).offset(skip).limit(limit).all()
+    return db.query(models.JournalEntry).filter(models.JournalEntry.owner_id == user_id).order_by(models.JournalEntry.created_at.desc()).offset(skip).limit(limit).all()
 
 def create_user_entry(db: Session, entry: schemas.JournalEntryCreate, user_id: int):
     db_entry = models.JournalEntry(**entry.model_dump(), owner_id=user_id)
@@ -24,3 +24,20 @@ def create_user_entry(db: Session, entry: schemas.JournalEntryCreate, user_id: i
     db.commit()
     db.refresh(db_entry)
     return db_entry
+
+def create_entry_insight(db: Session, insight: dict, entry_id: int):
+    db_insight = models.EntryInsight(**insight, entry_id=entry_id)
+    db.add(db_insight)
+    db.commit()
+    db.refresh(db_insight)
+    return db_insight
+
+def get_narrative_summaries(db: Session, user_id: int, skip: int = 0, limit: int = 100):
+    return db.query(models.NarrativeSummary).filter(models.NarrativeSummary.user_id == user_id).order_by(models.NarrativeSummary.created_at.desc()).offset(skip).limit(limit).all()
+
+def create_narrative_summary(db: Session, summary: schemas.NarrativeSummaryCreate, user_id: int):
+    db_summary = models.NarrativeSummary(**summary.model_dump(), user_id=user_id)
+    db.add(db_summary)
+    db.commit()
+    db.refresh(db_summary)
+    return db_summary
