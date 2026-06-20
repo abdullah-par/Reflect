@@ -4,6 +4,10 @@ import { fetchWithAuth } from './api';
 import { formatWatermarkDate, formatPastEchoLabel, buildObserverNote } from './utils/format';
 import { Theme } from './useTheme';
 import TypewriterText from './TypewriterText';
+import { BlockEditor } from './components/editor/BlockEditor';
+import './components/editor/editor.css';
+import { ContentBlock } from './api';
+import { v4 as uuidv4 } from 'uuid';
 
 interface Props {
   theme: Theme;
@@ -35,39 +39,16 @@ function SunIcon() {
 }
 
 export default function Editor({ theme, toggleTheme }: Props) {
-  const [content, setContent] = useState('');
+  const [blocks, setBlocks] = useState<ContentBlock[]>([]);
+  const content = blocks.map(b => b.text).join('\n');
   const [isSaving, setIsSaving] = useState(false);
   const [isListening, setIsListening] = useState(false);
   const [insight, setInsight] = useState<any>(null);
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
   const recognitionRef = useRef<any>(null);
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
 
-  useEffect(() => {
-    if (textareaRef.current) {
-      textareaRef.current.style.height = 'auto';
-      textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`;
-
-      if (document.activeElement === textareaRef.current) {
-        const caret = textareaRef.current.selectionEnd;
-        const sub = content.substring(0, caret);
-        const newlines = (sub.match(/\n/g) || []).length;
-        const style = window.getComputedStyle(textareaRef.current);
-        const fontSize = parseFloat(style.fontSize) || 16;
-        const lhRaw = style.lineHeight;
-        const lineHeight = lhRaw === 'normal' ? fontSize * 1.5 : parseFloat(lhRaw);
-        const padding = parseFloat(style.paddingTop) || 0;
-        const caretY = textareaRef.current.offsetTop + padding + (newlines * lineHeight) + (lineHeight / 2);
-        const targetScroll = caretY - (window.innerHeight / 2);
-        
-        window.scrollTo({
-          top: Math.max(0, targetScroll),
-          behavior: 'smooth'
-        });
-      }
-    }
-  }, [content]);
+  // Removed textarea auto-resize effect as BlockEditor manages its own height
 
   useEffect(() => {
     return () => {
@@ -90,7 +71,7 @@ export default function Editor({ theme, toggleTheme }: Props) {
     try {
       const res = await fetchWithAuth('/entries/', {
         method: 'POST',
-        body: JSON.stringify({ content }),
+        body: JSON.stringify({ content, content_blocks: blocks }),
       });
 
       if (res.ok) {
@@ -140,7 +121,16 @@ export default function Editor({ theme, toggleTheme }: Props) {
           .map((result: any) => result[0].transcript)
           .join('');
         if (transcript) {
-          setContent((prev) => prev + (prev.endsWith(' ') || prev === '' ? '' : ' ') + transcript);
+          setBlocks((prev) => {
+            if (prev.length === 0) return [{ id: uuidv4(), type: 'paragraph', text: transcript, marks: [] }];
+            const newBlocks = [...prev];
+            const last = newBlocks[newBlocks.length - 1];
+            newBlocks[newBlocks.length - 1] = {
+              ...last,
+              text: last.text + (last.text.endsWith(' ') || last.text === '' ? '' : ' ') + transcript
+            };
+            return newBlocks;
+          });
         }
       };
       rec.onerror = () => setIsListening(false);
@@ -254,7 +244,7 @@ export default function Editor({ theme, toggleTheme }: Props) {
       <p className="watermark-date">{formatWatermarkDate()}</p>
 
       <div style={{ position: 'relative', flex: 1, display: 'flex', flexDirection: 'column' }}>
-        {content === '' && (
+        {blocks.length === 0 || (blocks.length === 1 && blocks[0].text === '') ? (
           <div style={{
             position: 'absolute',
             top: 0,
@@ -269,15 +259,10 @@ export default function Editor({ theme, toggleTheme }: Props) {
           }}>
             <TypewriterText text="I'm thinking about..." speed={40} />
           </div>
-        )}
-        <textarea
-          ref={textareaRef}
-          value={content}
-          onChange={(e) => setContent(e.target.value)}
-          placeholder=""
-          className="editor-textarea"
-          autoFocus
-          style={{ overflow: 'hidden' }}
+        ) : null}
+        <BlockEditor 
+          initialBlocks={blocks} 
+          onChange={setBlocks} 
         />
       </div>
     </div>

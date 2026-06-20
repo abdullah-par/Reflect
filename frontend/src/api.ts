@@ -91,3 +91,18 @@ export const updateBook = async (bookId: number, title: string, coverImageUrl?: 
   if (res.ok) return await res.json();
   throw new Error('Failed to update book');
 };
+
+export interface ContentBlockMark {
+  type: string;
+  start: number;
+  end: number;
+}
+
+export interface ContentBlock {
+  id: string;
+  type: string;
+  text: string;
+  marks?: ContentBlockMark[];
+  fontFamily?: string;
+  fontSize?: number;
+}
