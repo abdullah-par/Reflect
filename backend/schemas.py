@@ -49,9 +49,23 @@ class Book(BookBase):
     class Config:
         from_attributes = True
 
+class ContentBlockMark(BaseModel):
+    type: str
+    start: int
+    end: int
+
+class ContentBlock(BaseModel):
+    id: str
+    type: str
+    text: str
+    marks: Optional[List[ContentBlockMark]] = None
+    fontFamily: Optional[str] = None
+    fontSize: Optional[int] = None
+
 class JournalEntryBase(BaseModel):
     title: Optional[str] = None
-    content: str
+    content: Optional[str] = None
+    content_blocks: Optional[List[ContentBlock]] = None
     book_id: Optional[int] = None
 
 class JournalEntryCreate(JournalEntryBase):
@@ -69,7 +83,8 @@ class JournalEntry(JournalEntryBase):
 # New schemas for edits
 class JournalEntryEditBase(BaseModel):
     title: Optional[str] = None
-    content: str
+    content: Optional[str] = None
+    content_blocks: Optional[List[ContentBlock]] = None
 
 class JournalEntryEditCreate(JournalEntryEditBase):
     pass

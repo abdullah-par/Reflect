@@ -33,6 +33,7 @@ class JournalEntry(Base):
     id = Column(Integer, primary_key=True, index=True)
     title = Column(String, nullable=True)  # optional AI-suggested title
     content = Column(Text, index=False)
+    content_blocks = Column(JSON, nullable=True)
     created_at = Column(DateTime, default=datetime.datetime.utcnow)
     owner_id = Column(Integer, ForeignKey("users.id"))
     book_id = Column(Integer, ForeignKey("books.id"), nullable=True)
@@ -51,6 +52,7 @@ class JournalEntryEdit(Base):
     entry_id = Column(Integer, ForeignKey("journal_entries.id"), nullable=False)
     title = Column(String, nullable=True)
     content = Column(Text, nullable=False)
+    content_blocks = Column(JSON, nullable=True)
     edited_at = Column(DateTime, default=datetime.datetime.utcnow)
 
     entry = relationship("JournalEntry", back_populates="edits")

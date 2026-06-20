@@ -23,9 +23,20 @@ def get_entries(db: Session, user_id: int, book_id: int = None, skip: int = 0, l
     return query.order_by(models.JournalEntry.created_at.desc()).offset(skip).limit(limit).all()
 
 def create_user_entry(db: Session, entry: schemas.JournalEntryCreate, user_id: int):
+    if entry.content_blocks:
+        entry.content = "\n".join(block.text for block in entry.content_blocks)
+    elif not entry.content:
+        entry.content = ""
     if not entry.title:
         entry.title = suggest_title(entry.content)
-    db_entry = models.JournalEntry(**entry.model_dump(), owner_id=user_id)
+    
+    # We dump to dict and remove models since models.JournalEntry(**...) requires dicts
+    entry_data = entry.model_dump()
+    if "content_blocks" in entry_data and entry_data["content_blocks"]:
+        # content_blocks might already be dicts but if not model_dump handles it
+        pass
+        
+    db_entry = models.JournalEntry(**entry_data, owner_id=user_id)
     db.add(db_entry)
     db.commit()
     db.refresh(db_entry)
@@ -63,16 +74,25 @@ def update_journal_entry(db: Session, entry_id: int, entry_data: schemas.Journal
     db_entry = db.query(models.JournalEntry).filter(models.JournalEntry.id == entry_id).first()
     if not db_entry:
         raise ValueError("Journal entry not found")
+        
+    if entry_data.content_blocks:
+        entry_data.content = "\n".join(block.text for block in entry_data.content_blocks)
+    elif not entry_data.content:
+        entry_data.content = ""
+        
+    entry_dump = entry_data.model_dump()
     # Record edit (store new content as edit)
     edit = models.JournalEntryEdit(
         entry_id=entry_id,
         title=entry_data.title,
         content=entry_data.content,
+        content_blocks=entry_dump.get("content_blocks")
     )
     db.add(edit)
     # Update the main entry
     db_entry.title = entry_data.title
     db_entry.content = entry_data.content
+    db_entry.content_blocks = entry_dump.get("content_blocks")
     db.commit()
     db.refresh(db_entry)
     return db_entry
