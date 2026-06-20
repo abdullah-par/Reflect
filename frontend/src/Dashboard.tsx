@@ -12,7 +12,7 @@ import {
   describePersonPresence,
 } from './utils/format';
 
-import { Library, Book, Bookmark, Activity, BookOpen, Settings, Stethoscope } from 'lucide-react';
+import { Library, Book, Bookmark, Activity, BookOpen, Settings, Stethoscope, LogOut } from 'lucide-react';
 import DiagnosticsPane from "./DiagnosticsPane";
 import LibraryPane from "./LibraryPane";
 import MirrorPane from "./MirrorPane";
@@ -286,6 +286,15 @@ export default function Dashboard({ theme, toggleTheme }: Props) {
               <Stethoscope size={16} /> Diagnostics
             </button>
           </nav>
+        </div>
+        <div style={{ marginTop: 'auto', padding: '1.5rem 1.25rem' }}>
+          <button
+            onClick={handleLogout}
+            className="ds-nav-item"
+            style={{ width: '100%' }}
+          >
+            <LogOut size={16} /> Log out
+          </button>
         </div>
       </aside>
 

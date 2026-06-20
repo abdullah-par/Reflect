@@ -42,9 +42,6 @@ function CheckIcon() {
 
 export default function Landing({ theme, toggleTheme }: Props) {
   const token = localStorage.getItem('reflect_token');
-  if (token) {
-    return <Navigate to="/app" replace />;
-  }
 
   return (
     <div className="lp-root">
@@ -69,8 +66,14 @@ export default function Landing({ theme, toggleTheme }: Props) {
             >
               {theme === 'dark' ? <SunIcon /> : <MoonIcon />}
             </button>
-            <Link to="/auth" className="lp-nav-link">Log in</Link>
-            <Link to="/auth" className="lp-nav-cta">Get started</Link>
+            {token ? (
+              <Link to="/app" className="lp-nav-cta">Go to Dashboard</Link>
+            ) : (
+              <>
+                <Link to="/auth" className="lp-nav-link">Log in</Link>
+                <Link to="/auth" className="lp-nav-cta">Get started</Link>
+              </>
+            )}
           </div>
         </div>
       </header>
@@ -88,8 +91,14 @@ export default function Landing({ theme, toggleTheme }: Props) {
                 Reflect connects your daily entries to your past writing, surfaces behavioral patterns over time, and helps you understand yourself better, privately.
               </p>
               <div className="lp-hero-actions">
-                <Link to="/auth" className="lp-btn-primary">Start for free</Link>
-                <Link to="/auth" className="lp-btn-secondary">Sign in</Link>
+                {token ? (
+                  <Link to="/app" className="lp-btn-primary">Go to Dashboard</Link>
+                ) : (
+                  <>
+                    <Link to="/auth" className="lp-btn-primary">Start for free</Link>
+                    <Link to="/auth" className="lp-btn-secondary">Sign in</Link>
+                  </>
+                )}
               </div>
               <p className="lp-hero-note">No credit card required. Your data stays on your device.</p>
             </div>
