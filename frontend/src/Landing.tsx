@@ -85,7 +85,10 @@ export default function Landing({ theme, toggleTheme }: Props) {
             <div className="lp-hero-text animate-up delay-1">
               <p className="lp-hero-label">Personal AI Journal</p>
               <h1 className="lp-hero-title">
-                A journal that remembers everything you've written
+                A journal that<br />
+                <em>remembers</em><br />
+                everything you've<br />
+                written
               </h1>
               <p className="lp-hero-desc">
                 Reflect connects your daily entries to your past writing, surfaces behavioral patterns over time, and helps you understand yourself better, privately.

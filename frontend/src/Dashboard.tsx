@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { fetchWithAuth, fetchSummaries, generateSummary, fetchBooks, fetchCurrentUser } from './api';
+import { fetchWithAuth, fetchSummaries, generateSummary, fetchBooks, fetchCurrentUser, fetchEntries, createBook } from './api';
 import { Theme } from './useTheme';
 import {
   groupEntriesByPeriod,
@@ -12,16 +12,45 @@ import {
   describePersonPresence,
 } from './utils/format';
 
-import { Library, Book, Bookmark, Activity, BookOpen, Settings, Stethoscope, LogOut } from 'lucide-react';
+import {
+  Activity,
+  Book,
+  BookOpen,
+  Bookmark,
+  ChevronRight,
+  LogOut,
+  Menu,
+  PanelLeftClose,
+  PanelLeftOpen,
+  Plus,
+  Search,
+  Settings,
+  Stethoscope,
+} from 'lucide-react';
 import DiagnosticsPane from "./DiagnosticsPane";
 import LibraryPane from "./LibraryPane";
 import MirrorPane from "./MirrorPane";
-import { useSettings, FontStyle } from './useSettings';
+import OverviewPane from "./OverviewPane";
+import { useSettings } from './useSettings';
 
 interface Props {
   theme: Theme;
   toggleTheme: () => void;
 }
+
+type SidebarBook = {
+  id: number;
+  title: string;
+  cover_image_url?: string;
+  created_at: string;
+};
+
+type SidebarEntry = {
+  id: number | string;
+  title?: string | null;
+  content?: string | null;
+  created_at: string;
+};
 
 function MoonIcon() {
   return (
@@ -47,42 +76,23 @@ function SunIcon() {
   );
 }
 
-const FONT_OPTIONS = [
-  { value: 'editorial',    label: 'Crimson Text',    tag: 'editorial',  sample: 'Italic, warm. Classic diary feel.' },
-  { value: 'lora',         label: 'Lora',            tag: 'literary',   sample: 'Balanced. Best for long entries.' },
-  { value: 'playfair',     label: 'Playfair Display',tag: 'novel',      sample: 'High contrast. 19th-century diary.' },
-  { value: 'baskerville',  label: 'Libre Baskerville',tag: 'paperback', sample: 'Neutral, highly legible.' },
-  { value: 'merriweather', label: 'Merriweather',    tag: 'long-read',  sample: 'Comfortable at any length.' },
-  { value: 'source-serif', label: 'Source Serif 4',  tag: 'editorial',  sample: 'Modern. Magazine quality.' },
-  { value: 'typewriter',   label: 'Courier Prime',   tag: 'typewriter', sample: 'Raw draft energy.' },
-  { value: 'sans',         label: 'Inter',           tag: 'modern',     sample: 'Minimal, distraction-free.' },
-];
-
-function getFontFamily(style: FontStyle): string {
-  const map: Record<FontStyle, string> = {
-    editorial:    "'Crimson Text', Georgia, serif",
-    lora:         "'Lora', Georgia, serif",
-    playfair:     "'Playfair Display', Georgia, serif",
-    baskerville:  "'Libre Baskerville', Georgia, serif",
-    merriweather: "'Merriweather', Georgia, serif",
-    'source-serif': "'Source Serif 4', Georgia, serif",
-    typewriter:   "'Courier Prime', 'Courier New', monospace",
-    sans:         "'Inter', system-ui, sans-serif",
-  };
-  return map[style];
-}
-
 export default function Dashboard({ theme, toggleTheme }: Props) {
   const [entries, setEntries] = useState<any[]>([]);
   const [summaries, setSummaries] = useState<any[]>([]);
-  const [books, setBooks] = useState<any[]>([]);
-  const [activeTab, setActiveTab] = useState<'library' | 'journal' | 'chapters' | 'mirror' | 'manuscript' | 'settings' | 'history' | 'diagnostics'>('library');
+  const [books, setBooks] = useState<SidebarBook[]>([]);
+  const [entriesByBook, setEntriesByBook] = useState<Record<number, SidebarEntry[]>>({});
+  const [activeTab, setActiveTab] = useState<'journal' | 'chapters' | 'patterns'>('journal');
   const [activeBookId, setActiveBookId] = useState<number | null>(null);
   const [selectedEntryId, setSelectedEntryId] = useState<string | null>(null);
   const [suggestedTitle, setSuggestedTitle] = useState<string | null>(null);
   const [suggesting, setSuggesting] = useState(false);
   const [user, setUser] = useState<{ email: string } | null>(null);
   const [accountMenuOpen, setAccountMenuOpen] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(() => localStorage.getItem('reflect_sidebar_collapsed') === 'true');
+  const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
+  const [isMobile, setIsMobile] = useState(() => window.matchMedia('(max-width: 760px)').matches);
+  const [expandedBooks, setExpandedBooks] = useState<Set<number>>(() => new Set());
+  const [treeFilter, setTreeFilter] = useState('');
 
   const handleSuggestTitle = async () => {
     if (!selectedEntryId) return;
@@ -138,6 +148,18 @@ export default function Dashboard({ theme, toggleTheme }: Props) {
   }, []);
 
   useEffect(() => {
+    localStorage.setItem('reflect_sidebar_collapsed', String(sidebarCollapsed));
+  }, [sidebarCollapsed]);
+
+  useEffect(() => {
+    const media = window.matchMedia('(max-width: 760px)');
+    const syncMobile = () => setIsMobile(media.matches);
+    syncMobile();
+    media.addEventListener('change', syncMobile);
+    return () => media.removeEventListener('change', syncMobile);
+  }, []);
+
+  useEffect(() => {
     if (activeTab === 'journal' && entries.length > 0 && !selectedEntryId) {
       setSelectedEntryId(entries[0].id);
     }
@@ -148,8 +170,18 @@ export default function Dashboard({ theme, toggleTheme }: Props) {
       fetchCurrentUser().then(setUser).catch(() => {});
       const resBooks = await fetchBooks();
       setBooks(resBooks);
+      const bookEntryPairs = await Promise.all(
+        resBooks.map(async (book: SidebarBook) => [book.id, await fetchEntries(book.id)] as const)
+      );
+      const nextEntriesByBook = Object.fromEntries(bookEntryPairs);
+      setEntriesByBook(nextEntriesByBook);
+      setExpandedBooks((prev) => {
+        if (prev.size > 0 || resBooks.length === 0) return prev;
+        return new Set([resBooks[0].id]);
+      });
       if (resBooks.length > 0 && !activeBookId) {
         setActiveBookId(resBooks[0].id);
+        setEntries(nextEntriesByBook[resBooks[0].id] || []);
       }
       setSummaries(await fetchSummaries());
     } catch (err) {
@@ -159,21 +191,64 @@ export default function Dashboard({ theme, toggleTheme }: Props) {
 
   useEffect(() => {
     if (activeBookId) {
-      fetchWithAuth(`/entries/?book_id=${activeBookId}`)
-        .then(res => res.json())
-        .then(data => {
-          setEntries(data);
-          if (data.length > 0 && !selectedEntryId) {
-            setSelectedEntryId(data[0].id);
-          }
-        })
-        .catch(err => console.error('Error loading entries:', err));
+      const bookEntries = entriesByBook[activeBookId] || [];
+      setEntries(bookEntries);
+      if (bookEntries.length > 0 && !bookEntries.some(entry => String(entry.id) === String(selectedEntryId))) {
+        setSelectedEntryId(String(bookEntries[0].id));
+      }
     }
-  }, [activeBookId]);
+  }, [activeBookId, entriesByBook, selectedEntryId]);
 
   const handleLogout = () => {
     localStorage.removeItem('reflect_token');
     navigate('/');
+  };
+
+  const closeMobileSidebar = () => setMobileSidebarOpen(false);
+
+  const toggleBookExpanded = (bookId: number) => {
+    setExpandedBooks((prev) => {
+      const next = new Set(prev);
+      if (next.has(bookId)) next.delete(bookId);
+      else next.add(bookId);
+      return next;
+    });
+  };
+
+  const handleBookSelect = (bookId: number) => {
+    setActiveBookId(bookId);
+    setActiveTab('journal');
+    closeMobileSidebar();
+  };
+
+  const handleEntrySelect = (entryId: string | number, bookId: number) => {
+    setActiveBookId(bookId);
+    setSelectedEntryId(String(entryId));
+    closeMobileSidebar();
+    navigate(`/editor?id=${entryId}`);
+  };
+
+  const handleCreateEntry = (bookId: number) => {
+    closeMobileSidebar();
+    navigate(`/editor?book_id=${bookId}`);
+  };
+
+  const handleCreateBook = async () => {
+    try {
+      const book = await createBook('Untitled Journal');
+      await loadData();
+      setActiveBookId(book.id);
+      setActiveTab('journal');
+      setExpandedBooks((prev) => new Set(prev).add(book.id));
+      closeMobileSidebar();
+    } catch (err) {
+      console.error('Error creating journal:', err);
+    }
+  };
+
+  const getEntryTitle = (entry: SidebarEntry) => {
+    const title = entry.title?.trim() || entry.content?.trim() || 'Untitled';
+    return title.length > 48 ? `${title.slice(0, 48)}...` : title;
   };
 
 
@@ -226,114 +301,98 @@ export default function Dashboard({ theme, toggleTheme }: Props) {
 
   const { relationships, patterns, toneCounts } = getAggregateInsights();
   const groupedEntries = groupEntriesByPeriod(entries);
+  const visibleBooks = books
+    .map((book) => ({
+      ...book,
+      entries: entriesByBook[book.id] || [],
+    }))
+    .filter((book) => {
+      const q = treeFilter.trim().toLowerCase();
+      if (!q) return true;
+      return (
+        book.title.toLowerCase().includes(q) ||
+        book.entries.some((entry) => getEntryTitle(entry).toLowerCase().includes(q))
+      );
+    });
 
-  const selectedEntry = entries.find(e => e.id === selectedEntryId) || entries[0];
+  const selectedEntry = entries.find(e => String(e.id) === String(selectedEntryId)) || entries[0];
   const observerNote = selectedEntry?.insight ? buildObserverNote(selectedEntry.insight) : null;
   const pastEchoes = selectedEntry?.insight?.relevant_past_entries ?? [];
 
   return (
-    <div className="ds-split">
+    <div className={`ds-split ${sidebarCollapsed ? 'sidebar-collapsed' : ''} ${mobileSidebarOpen ? 'sidebar-open' : ''}`}>
+      {isMobile && mobileSidebarOpen && <button className="ds-sidebar-scrim" onClick={closeMobileSidebar} aria-label="Close sidebar" />}
       {/* ───────────────── SIDEBAR ───────────────── */}
       <aside className="ds-sidebar">
-        <div className="ds-sidebar-header">
-          <Link to="/" className="ds-logo">Reflect</Link>
-          <nav className="ds-nav">
-            <button
-              onClick={() => setActiveTab('library')}
-              className={`ds-nav-item ${activeTab === 'library' ? 'active' : ''}`}
-            >
-              <Library size={16} /> Library
+        <Link to="/" className="ds-brand-link" onClick={closeMobileSidebar}>Reflect</Link>
+        <nav className="ds-sidebar-nav">
+          <div className="ds-sidebar-group">
+            <button onClick={() => { setActiveTab('journal'); closeMobileSidebar(); }} className={`ds-tree-row ${activeTab === 'journal' ? 'active' : ''}`}>
+              <span className="ds-row-label">Journal</span>
             </button>
-            <button
-              onClick={() => {
-                setActiveTab('journal');
-                if (activeTab === 'journal') setIsIndexOpen(!isIndexOpen);
-              }}
-              className={`ds-nav-item ${activeTab === 'journal' ? 'active' : ''}`}
-            >
-              <Book size={16} /> Journal
+            <button onClick={() => { setActiveTab('chapters'); closeMobileSidebar(); }} className={`ds-tree-row ${activeTab === 'chapters' ? 'active' : ''}`}>
+              <span className="ds-row-label">Chapters</span>
             </button>
-            <button
-              onClick={() => setActiveTab('chapters')}
-              className={`ds-nav-item ${activeTab === 'chapters' ? 'active' : ''}`}
-            >
-              <Bookmark size={16} /> Chapters
+            <button onClick={() => { setActiveTab('patterns'); closeMobileSidebar(); }} className={`ds-tree-row ${activeTab === 'patterns' ? 'active' : ''}`}>
+              <span className="ds-row-label">Patterns</span>
             </button>
-            <button
-              onClick={() => setActiveTab('mirror')}
-              className={`ds-nav-item ${activeTab === 'mirror' ? 'active' : ''}`}
-            >
-              <Activity size={16} /> Patterns
-            </button>
-            <button
-              onClick={() => setActiveTab('manuscript')}
-              className={`ds-nav-item ${activeTab === 'manuscript' ? 'active' : ''}`}
-            >
-              <BookOpen size={16} /> Book
-            </button>
-            <button
-              onClick={() => setActiveTab('settings')}
-              className={`ds-nav-item ${activeTab === 'settings' ? 'active' : ''}`}
-            >
-              <Settings size={16} /> Settings
-            </button>
+          </div>
 
-            <button
-              onClick={() => setActiveTab('diagnostics')}
-              className={`ds-nav-item ${activeTab === 'diagnostics' ? 'active' : ''}`}
-              disabled={!selectedEntryId}
-            >
-              <Stethoscope size={16} /> Diagnostics
-            </button>
-          </nav>
-        </div>
-        <div style={{ marginTop: 'auto', padding: '1.5rem 1.25rem' }}>
-          <button
-            onClick={handleLogout}
-            className="ds-nav-item"
-            style={{ width: '100%' }}
-          >
-            <LogOut size={16} /> Log out
-          </button>
-        </div>
-      </aside>
+          <div className="ds-divider"></div>
 
-      {/* ───────────────── MAIN PANE ───────────────── */}
-      <main className="ds-main">
-        {/* Index Drawer Overlay */}
-        <div className={`ds-index-drawer ${isIndexOpen && activeTab === 'journal' ? 'open' : ''}`}>
-          <button className="ds-index-close" onClick={() => setIsIndexOpen(false)} aria-label="Close index">
-            ✕
-          </button>
-          <h2 className="ds-index-title">Index</h2>
           {groupedEntries.length > 0 ? (
-            <div className="ds-entry-list" style={{ padding: 0 }}>
+            <div className="ds-entry-list">
               {groupedEntries.map(({ label, entries: periodEntries }) => (
-                <div key={label} style={{ marginBottom: '1rem' }}>
-                  <div className="ds-entry-date" style={{ padding: '0 12px', marginBottom: '6px', fontFamily: 'var(--font-ui)' }}>{label}</div>
+                <div key={label} style={{ marginBottom: '1.25rem' }}>
+                  <div className="ds-entry-date">{label}</div>
                   {periodEntries.map(entry => (
                     <button
                       key={entry.id}
                       onClick={() => {
-                        setSelectedEntryId(entry.id);
-                        setIsIndexOpen(false); // Close on selection for mobile-friendly flow
+                        setSelectedEntryId(String(entry.id));
                       }}
-                      className={`ds-entry-item ${selectedEntryId === entry.id ? 'active' : ''}`}
-                      style={{ padding: '8px 12px' }}
+                      className={`ds-entry-item ${selectedEntryId === String(entry.id) ? 'active' : ''}`}
                     >
-                      <div className="ds-entry-preview" style={{ fontFamily: 'var(--font-head)', fontSize: '1rem' }}>{entry.content}</div>
+                      <div className="ds-entry-preview">{getEntryTitle(entry)}</div>
                     </button>
                   ))}
                 </div>
               ))}
             </div>
           ) : (
-            <p className="ds-empty-state" style={{ height: 'auto', marginTop: '2rem' }}>No entries yet.</p>
+            <p className="ds-empty-state" style={{ padding: '0 1.25rem' }}>No entries yet.</p>
           )}
+        </nav>
+
+        <div className="ds-sidebar-bottom-profile">
+          <div className="ds-account-wrap">
+            <button type="button" onClick={() => setAccountMenuOpen(!accountMenuOpen)} className="ds-account-button" aria-label="Account menu">
+              <span className="ds-avatar">{user?.email.charAt(0).toUpperCase() || 'R'}</span>
+              <div className="ds-account-info">
+                <span className="ds-account-name">{user?.email.split('@')[0] || 'Reflect User'}</span>
+                <span className="ds-account-email">{user?.email || 'user@reflect.com'}</span>
+              </div>
+            </button>
+            {accountMenuOpen && (
+              <div className="ds-account-menu" style={{ bottom: '100%', top: 'auto', marginBottom: '8px' }}>
+                <button type="button" onClick={handleLogout}>Sign out</button>
+              </div>
+            )}
+          </div>
         </div>
+      </aside>
+
+      {/* ───────────────── MAIN PANE ───────────────── */}
+      <main className="ds-main">
+
 
         {/* Top Right Controls */}
         <div style={{ position: 'absolute', top: '1.5rem', right: '2rem', display: 'flex', gap: '1rem', alignItems: 'center', zIndex: 10 }}>
+          {isMobile && (
+            <button type="button" onClick={() => setMobileSidebarOpen(true)} className="theme-toggle-btn" aria-label="Open sidebar">
+              <Menu size={16} />
+            </button>
+          )}
           <button
             type="button"
             onClick={toggleTheme}
@@ -344,40 +403,22 @@ export default function Dashboard({ theme, toggleTheme }: Props) {
           </button>
           <Link to="/editor" className="quiet-link">✦ Write</Link>
           
-          {user && (
-            <div style={{ position: 'relative' }}>
-              <button 
-                onClick={() => setAccountMenuOpen(!accountMenuOpen)}
-                style={{ 
-                  width: '32px', height: '32px', borderRadius: 'var(--radius-full)',
-                  background: 'var(--accent-2)', color: 'white', border: 'none',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  fontWeight: 'bold', cursor: 'pointer', boxShadow: 'var(--shadow-sm)'
-                }}
-              >
-                {user.email.charAt(0).toUpperCase()}
-              </button>
-              
-              {accountMenuOpen && (
-                <div style={{
-                  position: 'absolute', top: '100%', right: 0, marginTop: '8px',
-                  background: 'var(--bg-2)', border: '1px solid var(--border)',
-                  borderRadius: 'var(--radius-sm)', boxShadow: 'var(--shadow-lg)',
-                  padding: '8px', minWidth: '150px', zIndex: 100
-                }}>
-                  <div style={{ padding: '8px', fontSize: '0.85rem', color: 'var(--text-2)', borderBottom: '1px solid var(--border)', marginBottom: '4px', wordBreak: 'break-all' }}>
-                    {user.email}
-                  </div>
-                  <button onClick={handleLogout} style={{ width: '100%', textAlign: 'left', padding: '8px', background: 'transparent', border: 'none', color: 'var(--text-1)', cursor: 'pointer', borderRadius: 'var(--radius-xs)' }}>
-                    Sign out
-                  </button>
-                </div>
-              )}
-            </div>
-          )}
         </div>
 
         <div className="ds-content-inner animate-up">
+          {activeTab === 'overview' && (
+            <OverviewPane 
+              user={user} 
+              entriesByBook={entriesByBook} 
+              patterns={patterns} 
+              toneCounts={toneCounts} 
+              onEntrySelect={(entryId, bookId) => {
+                setActiveTab('journal');
+                handleEntrySelect(entryId, bookId);
+              }}
+            />
+          )}
+
           {activeTab === 'library' && (
             <LibraryPane books={books} onSelectBook={(id) => {
               setActiveBookId(id);
@@ -394,36 +435,26 @@ export default function Dashboard({ theme, toggleTheme }: Props) {
             ) : selectedEntry ? (
               <article>
                 <div className="ds-entry-header">
-                  {selectedEntry.title && <h2 className="ds-entry-title">{selectedEntry.title}</h2>}
                   <div className="ds-entry-date-large">{formatEntryTime(selectedEntry.created_at)}</div>
                 </div>
                 
                 <div className="ds-entry-text">{selectedEntry.content}</div>
 
-                <button onClick={handleSuggestTitle} disabled={suggesting} className="suggest-title-btn">
-                  {suggesting ? 'Suggesting…' : 'Suggest Title'}
-                </button>
-                {suggestedTitle && (
-                  <div className="suggested-title">
-                    Suggested: <span className="clickable" onClick={applySuggestedTitle}>{suggestedTitle}</span>
-                  </div>
-                )}
-
                 {settings.enableObserverNotes && observerNote && (
-                  <div className="observer-note">
-                    <div className="lp-mock-insight-label">Reflect Noticed</div>
-                    {observerNote}
+                  <div className="observer-note-card">
+                    <div className="observer-note-label">REFLECT NOTICED</div>
+                    <div className="observer-note-content">{observerNote}</div>
                   </div>
                 )}
 
                 {settings.enableMemoryEcho && pastEchoes.length > 0 && (
-                  <div style={{ marginTop: '2rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                  <div className="past-echo-container">
                     {pastEchoes.map((past: any, idx: number) => {
                       const echoDate = past.metadata?.created_at || past.created_at;
                       return (
-                        <div key={idx} className="past-echo">
-                          <p className="past-echo-label">{formatPastEchoLabel(echoDate)}</p>
-                          <p className="past-echo-text">&ldquo;{past.content}&rdquo;</p>
+                        <div key={idx} className="past-echo-block">
+                          <div className="past-echo-label">{formatPastEchoLabel(echoDate)}</div>
+                          <div className="past-echo-text">"{past.content}"</div>
                         </div>
                       );
                     })}
@@ -575,51 +606,7 @@ export default function Dashboard({ theme, toggleTheme }: Props) {
 
           {activeTab === 'settings' && (
             <div className="settings-panel">
-              <section className="notebook-period typography-settings">
-                <h2 className="period-title">Typography</h2>
-                
-                <div className="font-picker">
-                  {FONT_OPTIONS.map(opt => (
-                    <button
-                      key={opt.value}
-                      className={`font-option ${settings.fontStyle === opt.value ? 'active' : ''}`}
-                      onClick={() => updateSettings({ fontStyle: opt.value as FontStyle })}
-                      style={{ fontFamily: getFontFamily(opt.value as FontStyle) }}
-                    >
-                      <span className="font-option-name">{opt.label}</span>
-                      <span className="font-option-tag">{opt.tag}</span>
-                      <span className="font-option-sample">{opt.sample}</span>
-                    </button>
-                  ))}
-                </div>
-
-                <label className="settings-slider-row">Size
-                  <input type="range" min={14} max={22} step={1}
-                    value={settings.fontSize}
-                    onChange={e => updateSettings({ fontSize: Number(e.target.value) })}
-                    style={{ flex: 1, margin: '0 1rem' }} />
-                  <span className="settings-slider-value">{settings.fontSize}px</span>
-                </label>
-
-                <label className="settings-slider-row" style={{marginTop: '0.5rem'}}>Line height
-                  <input type="range" min={1.4} max={2.2} step={0.1}
-                    value={settings.lineHeight}
-                    onChange={e => updateSettings({ lineHeight: Number(e.target.value) })}
-                    style={{ flex: 1, margin: '0 1rem' }} />
-                  <span className="settings-slider-value">{settings.lineHeight}</span>
-                </label>
-
-                <div className="settings-preview"
-                  style={{ fontFamily: 'var(--font-body)',
-                           fontSize: settings.fontSize,
-                           lineHeight: settings.lineHeight,
-                           marginTop: '2rem' }}>
-                  I wrote this at midnight, unsure of everything
-                  but the pen moving across the page.
-                </div>
-              </section>
-              
-              <section className="notebook-period" style={{ marginTop: '3rem' }}>
+              <section className="notebook-period">
                 <h2 className="period-title">AI Preferences</h2>
                 <div className="settings-group">
                   <label className="settings-toggle">

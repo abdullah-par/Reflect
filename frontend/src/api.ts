@@ -92,6 +92,31 @@ export const updateBook = async (bookId: number, title: string, coverImageUrl?: 
   throw new Error('Failed to update book');
 };
 
+export const fetchEntries = async (bookId?: number) => {
+  const path = bookId ? `/entries/?book_id=${bookId}` : '/entries/';
+  const res = await fetchWithAuth(path);
+  if (res.ok) return await res.json();
+  throw new Error('Failed to fetch entries');
+};
+
+export const fetchEntry = async (entryId: string | number) => {
+  const res = await fetchWithAuth(`/entries/${entryId}`);
+  if (res.ok) return await res.json();
+  throw new Error('Failed to fetch entry');
+};
+
+export const saveEntry = async (
+  entry: { content?: string; content_blocks?: ContentBlock[]; book_id?: number | null },
+  entryId?: string | number | null
+) => {
+  const res = await fetchWithAuth(entryId ? `/entries/${entryId}` : '/entries/', {
+    method: entryId ? 'PUT' : 'POST',
+    body: JSON.stringify(entry),
+  });
+  if (res.ok) return await res.json();
+  throw new Error('Failed to save entry');
+};
+
 export interface ContentBlockMark {
   type: string;
   start: number;

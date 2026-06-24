@@ -121,13 +121,35 @@ def create_entry(
 @app.get("/entries/", response_model=list[schemas.JournalEntry])
 def read_entries(
     book_id: Optional[int] = None,
+    q: Optional[str] = None,
     skip: int = 0, 
     limit: int = 100, 
     db: Session = Depends(get_db),
     current_user: schemas.User = Depends(get_current_user)
 ):
-    entries = crud.get_entries(db, user_id=current_user.id, book_id=book_id, skip=skip, limit=limit)
+    entries = crud.get_entries(db, user_id=current_user.id, book_id=book_id, search_query=q, skip=skip, limit=limit)
     return entries
+
+@app.get("/entries/{entry_id}", response_model=schemas.JournalEntry)
+def read_entry(entry_id: int, db: Session = Depends(get_db), current_user: schemas.User = Depends(get_current_user)):
+    db_entry = crud.get_entry(db, entry_id=entry_id)
+    if not db_entry or db_entry.owner_id != current_user.id:
+        raise HTTPException(status_code=404, detail="Entry not found")
+    return db_entry
+
+@app.put("/entries/{entry_id}", response_model=schemas.JournalEntry)
+def update_entry(
+    entry_id: int,
+    entry_data: schemas.JournalEntryCreate,
+    db: Session = Depends(get_db),
+    current_user: schemas.User = Depends(get_current_user)
+):
+    db_entry = crud.get_entry(db, entry_id=entry_id)
+    if not db_entry or db_entry.owner_id != current_user.id:
+        raise HTTPException(status_code=404, detail="Entry not found")
+    
+    updated_entry = crud.update_journal_entry(db=db, entry_id=entry_id, entry_data=entry_data)
+    return updated_entry
 
 # ----- Book Endpoints -----
 

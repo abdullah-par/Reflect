@@ -92,11 +92,15 @@ const DiagnosticsPane: React.FC<Props> = ({ entryId }) => {
           </div>
         )}
         
-        {diagnostic.loop_frequency !== undefined && (
+        {diagnostic.loop_frequency !== undefined && diagnostic.loop_frequency >= 3 ? (
+          <div className="rubber-stamp">
+            Recurring — {diagnostic.loop_frequency}{diagnostic.loop_frequency === 3 ? 'rd' : 'th'} time this month
+          </div>
+        ) : diagnostic.loop_frequency !== undefined ? (
           <p className="loop-frequency-text">
             This pattern appeared in {diagnostic.loop_frequency} of your last 10 entries.
           </p>
-        )}
+        ) : null}
       </div>
 
       {/* 2. Behavioral Blind-spots */}
@@ -129,11 +133,14 @@ const DiagnosticsPane: React.FC<Props> = ({ entryId }) => {
       </div>
 
       {/* 3. The Tactical Fix */}
-      <div className="diagnostic-panel">
+      <div className="diagnostic-panel tactical-fix-panel">
         <h3 className="panel-title">The Tactical Fix</h3>
         <ol className="tactical-fix-list">
           {parsedTacticalFix(diagnostic.tactical_fix).map((step, idx) => (
-            <li key={idx} className="tactical-step"><TypewriterText text={step} /></li>
+            <li key={idx} className="tactical-step">
+              <span className="step-number">{idx + 1}</span>
+              <span className="step-text"><TypewriterText text={step} /></span>
+            </li>
           ))}
         </ol>
       </div>

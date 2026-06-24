@@ -233,3 +233,44 @@
   background: var(--accent);
   color: white;
 }
+
+/* Typewriter Mode Styles */
+.typewriter-mode-active {
+  background: var(--bg-2) !important;
+  transition: background 0.4s ease;
+}
+
+.typewriter-mode-active .ProseMirror {
+  font-family: 'Courier Prime', 'Courier New', monospace !important;
+  caret-color: var(--accent-2) !important;
+  letter-spacing: 0.05em !important;
+}
+
+/* Visually suppress block fontFamily/fontSize overrides in typewriter mode */
+.typewriter-mode-active .block-row .ProseMirror {
+  font-family: 'Courier Prime', 'Courier New', monospace !important;
+  font-size: var(--reading-size, 1.05rem) !important;
+  line-height: var(--reading-lh, 1.85) !important;
+}
+
+/* Chrome buttons in editor chrome */
+.chrome-btn {
+  background: none;
+  border: none;
+  color: var(--text-3);
+  cursor: pointer;
+  padding: 5px;
+  border-radius: var(--radius-sm);
+  transition: color 0.15s, background 0.15s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.chrome-btn:hover {
+  background: var(--bg-hover, rgba(0, 0, 0, 0.05));
+  color: var(--text-1);
+}
+.chrome-btn.active {
+  color: var(--accent-2);
+}
+

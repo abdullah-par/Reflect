@@ -17,6 +17,8 @@ export interface AppSettings {
   enableObserverNotes: boolean;
   enableMemoryEcho: boolean;
   enablePatterns: boolean;
+  typewriterMode: boolean;
+  typewriterSound: boolean;
 }
 
 const DEFAULT_SETTINGS: AppSettings = {
@@ -26,6 +28,8 @@ const DEFAULT_SETTINGS: AppSettings = {
   enableObserverNotes: true,
   enableMemoryEcho: true,
   enablePatterns: true,
+  typewriterMode: false,
+  typewriterSound: true,
 };
 
 export function useSettings() {

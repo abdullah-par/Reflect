@@ -10,9 +10,10 @@ interface BlockEditorProps {
   initialBlocks: ContentBlock[];
   onChange: (blocks: ContentBlock[]) => void;
   readOnly?: boolean;
+  typewriterMode?: boolean;
 }
 
-export function BlockEditor({ initialBlocks, onChange, readOnly }: BlockEditorProps) {
+export function BlockEditor({ initialBlocks, onChange, readOnly, typewriterMode }: BlockEditorProps) {
   const [blocks, setBlocks] = useState<ContentBlock[]>(
     initialBlocks.length > 0 ? initialBlocks : [{ id: uuidv4(), type: 'paragraph', text: '', marks: [] }]
   );
@@ -22,6 +23,70 @@ export function BlockEditor({ initialBlocks, onChange, readOnly }: BlockEditorPr
   const [focusBlockId, setFocusBlockId] = useState<string | null>(null);
   
   const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!typewriterMode) return;
+
+    const handleInputOrSelection = () => {
+      if (slashMenu !== null) return;
+      const sel = window.getSelection();
+      if (sel && !sel.isCollapsed && sel.toString().length > 0) return;
+
+      if (!sel || sel.rangeCount === 0) return;
+      const range = sel.getRangeAt(0).cloneRange();
+      let rect = range.getBoundingClientRect();
+
+      if (rect.top === 0 && rect.bottom === 0) {
+        const element = range.startContainer.nodeType === Node.ELEMENT_NODE
+          ? (range.startContainer as Element)
+          : range.startContainer.parentElement;
+        if (element) {
+          rect = element.getBoundingClientRect();
+        }
+      }
+
+      if (rect.top === 0 && rect.bottom === 0) return;
+
+      const targetY = window.innerHeight * 0.40;
+      const currentY = rect.top;
+      const diff = currentY - targetY;
+
+      if (Math.abs(diff) > 2) {
+        const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        if (prefersReducedMotion) {
+          window.scrollBy(0, diff);
+        } else {
+          const start = window.scrollY;
+          const targetScrollY = start + diff;
+          const duration = 100;
+          const startTime = performance.now();
+
+          const animate = (time: number) => {
+            const elapsed = time - startTime;
+            const progress = Math.min(elapsed / duration, 1);
+            const ease = progress * (2 - progress);
+            window.scrollTo(0, start + (targetScrollY - start) * ease);
+            if (progress < 1) {
+              requestAnimationFrame(animate);
+            }
+          };
+          requestAnimationFrame(animate);
+        }
+      }
+    };
+
+    const container = containerRef.current;
+    if (container) {
+      container.addEventListener('input', handleInputOrSelection);
+      container.addEventListener('keydown', handleInputOrSelection);
+    }
+    return () => {
+      if (container) {
+        container.removeEventListener('input', handleInputOrSelection);
+        container.removeEventListener('keydown', handleInputOrSelection);
+      }
+    };
+  }, [typewriterMode, slashMenu]);
 
   useEffect(() => {
     onChange(blocks);

@@ -1,11 +1,11 @@
-@import url('https://fonts.googleapis.com/css2?family=Crimson+Text:ital,wght@0,400;0,600;1,400;1,600&family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500;1,600&family=Inter:wght@400;500;600&family=Courier+Prime:ital,wght@0,400;0,700;1,400&family=Lora:ital,wght@0,400;0,500;1,400&family=Playfair+Display:ital,wght@0,400;1,400&family=Libre+Baskerville:ital,wght@0,400;1,400&family=Merriweather:ital,wght@0,300;0,400;1,300&family=Source+Serif+4:ital,wght@0,400;1,400&family=DM+Serif+Display:ital@0;1&display=swap');
+﻿@import url('https://fonts.googleapis.com/css2?family=Crimson+Text:ital,wght@0,400;0,600;1,400;1,600&family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500;1,600&family=Inter:wght@400;500;600&family=Courier+Prime:ital,wght@0,400;0,700;1,400&family=Lora:ital,wght@0,400;0,500;1,400&family=Playfair+Display:ital,wght@0,400;1,400&family=Libre+Baskerville:ital,wght@0,400;1,400&family=Merriweather:ital,wght@0,300;0,400;1,300&family=Source+Serif+4:ital,wght@0,400;1,400&family=DM+Serif+Display:ital@0;1&display=swap');
 
 /* ===== RESET ===== */
 *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
 /* ===== DESIGN TOKENS ===== */
 :root {
-  /* Dark mode — Dark Academia Library */
+  /* Dark mode â€” Dark Academia Library */
   --bg:           #1A1816;
   --bg-2:         #24211E;
   --bg-3:         #302C28;
@@ -23,6 +23,7 @@
   --accent-border: #3E3934;
 
   --success:      #A59685;
+  --success-deep: #5A7552; /* Deep forest/sage */
   --error:        #B05C52;
 
   --line-color:   rgba(220, 207, 191, 0.05);
@@ -48,7 +49,7 @@
 }
 
 [data-theme="light"] {
-  /* Light mode — Novelist's Desk */
+  /* Light mode â€” Novelist's Desk */
   --bg:           #EFE6D8;   /* Warm aged paper */
   --bg-2:         #F8F4EC;   /* Surface */
   --bg-3:         #E6DCCE;
@@ -66,6 +67,7 @@
   --accent-border: #D8CCBB;
 
   --success:      #5F584F;
+  --success-deep: #3A5431; /* Deep forest/sage */
   --error:        #A34839;
 
   --line-color:   rgba(42, 38, 34, 0.06); /* Thin rules */
@@ -210,11 +212,15 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
 .delay-3 { animation-delay: 0.18s; }
 .delay-4 { animation-delay: 0.24s; }
 
-/* ─────────────────────────────────────────────────
+/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
    LANDING PAGE
-───────────────────────────────────────────────── */
+â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 
 .lp-root {
+  --font-head: 'Playfair Display', Georgia, serif;
+  --font-body: 'Lora', Georgia, serif;
+  --font-ui: 'Lora', Georgia, serif;
+  font-family: var(--font-body);
   min-height: 100vh;
   background: var(--bg);
 }
@@ -226,14 +232,15 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
   padding: 0 2rem;
 }
 
-/* ── Nav ── */
+/* â”€â”€ Nav â”€â”€ */
 .lp-nav {
   position: sticky;
   top: 0;
   z-index: 100;
-  background: var(--bg);
-  border-bottom: 1px solid var(--border);
-  height: 56px;
+  background: rgba(26, 24, 22, 0.85);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(220, 207, 191, 0.05);
+  height: 64px;
   transition: background 0.2s;
 }
 
@@ -248,10 +255,11 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
 }
 
 .lp-logo {
-  font-size: 1rem;
-  font-weight: 600;
+  font-family: var(--font-head);
+  font-size: 1.3rem;
+  font-weight: 500;
   color: var(--text-1);
-  letter-spacing: -0.02em;
+  letter-spacing: -0.01em;
 }
 
 .lp-nav-left {
@@ -314,8 +322,8 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
   font-weight: 500;
   color: #FFFFFF;
   background: var(--accent-2);
-  padding: 6px 16px;
-  border-radius: var(--radius-sm);
+  padding: 6px 18px;
+  border-radius: var(--radius-full);
   box-shadow: var(--shadow-sm);
   transition: transform 0.15s, box-shadow 0.15s, background 0.15s;
 }
@@ -329,10 +337,22 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
   transform: translateY(0) scale(0.98);
 }
 
-/* ── Hero ── */
+/* â”€â”€ Hero â”€â”€ */
 .lp-hero {
-  padding: 5rem 0 0;
-  border-bottom: 1px solid var(--border);
+  padding: 6rem 0 0;
+  position: relative;
+  overflow: visible;
+}
+
+.lp-hero::before {
+  content: '';
+  position: absolute;
+  top: 10%; left: 40%; width: 50%; height: 80%;
+  background: radial-gradient(circle, var(--accent) 0%, transparent 60%);
+  opacity: 0.12;
+  filter: blur(80px);
+  z-index: 0;
+  pointer-events: none;
 }
 
 .lp-hero-layout {
@@ -340,6 +360,8 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
   grid-template-columns: 440px 1fr;
   gap: 4rem;
   align-items: start;
+  position: relative;
+  z-index: 1;
 }
 
 .lp-hero-text {
@@ -356,20 +378,26 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
 }
 
 .lp-hero-title {
-  font-size: 2.5rem;
-  font-weight: 700;
-  line-height: 1.15;
+  font-size: 4rem;
+  font-weight: 500;
+  line-height: 1.1;
   color: var(--text-1);
   margin-bottom: 1.25rem;
-  letter-spacing: -0.03em;
+  letter-spacing: -0.02em;
+}
+
+.lp-hero-title em {
+  font-style: italic;
+  font-weight: 500;
+  color: var(--accent);
 }
 
 .lp-hero-desc {
-  font-size: 1rem;
+  font-size: 1.125rem;
   color: var(--text-2);
-  line-height: 1.7;
-  margin-bottom: 2rem;
-  max-width: 380px;
+  line-height: 1.6;
+  margin-bottom: 2.5rem;
+  max-width: 420px;
 }
 
 .lp-hero-actions {
@@ -383,15 +411,15 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
   color: var(--text-3);
 }
 
-/* ── Buttons ── */
+/* â”€â”€ Buttons â”€â”€ */
 .lp-btn-primary {
   display: inline-block;
   font-size: 0.875rem;
   font-weight: 500;
   color: #FFFFFF;
   background: var(--accent-2);
-  padding: 9px 20px;
-  border-radius: var(--radius-sm);
+  padding: 10px 24px;
+  border-radius: var(--radius-full);
   box-shadow: var(--shadow-sm);
   transition: transform 0.15s, box-shadow 0.15s, background 0.15s;
   white-space: nowrap;
@@ -413,8 +441,8 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
   color: var(--text-2);
   background: transparent;
   border: 1px solid var(--border-2);
-  padding: 8px 20px;
-  border-radius: var(--radius-sm);
+  padding: 9px 24px;
+  border-radius: var(--radius-full);
   transition: color 0.15s, border-color 0.15s, background 0.15s;
   white-space: nowrap;
 }
@@ -446,8 +474,6 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
   background: var(--bg-2);
   overflow: hidden;
   box-shadow: var(--shadow-lg);
-  transform: rotate(-1.2deg);
-  transform-origin: center center;
   position: relative;
   z-index: 1;
 }
@@ -625,7 +651,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
   line-height: 1.55;
 }
 
-/* ── Proof bar ── */
+/* â”€â”€ Proof bar â”€â”€ */
 .lp-proof-bar {
   border-bottom: 1px solid var(--border);
   background: var(--bg-2);
@@ -678,14 +704,14 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
   background: var(--border-2);
 }
 
-/* ── Sections ── */
+/* â”€â”€ Sections â”€â”€ */
 .lp-section {
   padding: 6rem 0;
   position: relative;
 }
 
 .lp-section:not(:last-child)::after {
-  content: '⁂'; /* Asterism character for book-like separator */
+  content: 'â‚'; /* Asterism character for book-like separator */
   position: absolute;
   bottom: 0;
   left: 50%;
@@ -698,8 +724,9 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
 }
 
 .lp-section-header {
-  margin-bottom: 3.5rem;
+  margin: 0 auto 3.5rem;
   max-width: 640px;
+  text-align: center;
 }
 
 .lp-section-title {
@@ -716,7 +743,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
   line-height: 1.7;
 }
 
-/* ── Feature rows ── */
+/* â”€â”€ Feature rows â”€â”€ */
 .lp-features-grid {
   display: flex;
   flex-direction: column;
@@ -772,7 +799,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
   flex-shrink: 0;
 }
 
-/* ── Feature visual cards ── */
+/* â”€â”€ Feature visual cards â”€â”€ */
 .lp-feature-visual {
   display: flex;
   align-items: flex-start;
@@ -888,7 +915,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
   border-top: 1px solid var(--border);
 }
 
-/* ── How it works ── */
+/* â”€â”€ How it works â”€â”€ */
 .lp-how {
   padding: 6rem 0;
   border-bottom: 1px solid var(--border);
@@ -934,7 +961,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
   line-height: 1.7;
 }
 
-/* ── Pricing ── */
+/* â”€â”€ Pricing â”€â”€ */
 .lp-pricing-section {
   background: var(--bg);
 }
@@ -1001,7 +1028,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
   flex-shrink: 0;
 }
 
-/* ── Footer ── */
+/* â”€â”€ Footer â”€â”€ */
 .lp-footer {
   border-top: 1px solid var(--border);
   padding: 3rem 0 2rem;
@@ -1081,9 +1108,9 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
 }
 .lp-footer-bottom-links a:hover { color: var(--text-2); }
 
-/* ─────────────────────────────────────────────────
+/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
    APP SHELL (Dashboard)
-───────────────────────────────────────────────── */
+â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 
 .app-shell {
   max-width: 760px;
@@ -1158,7 +1185,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
 .quiet-link.muted { color: var(--text-3); }
 .quiet-link.muted:hover { color: var(--text-2); background: var(--bg-2); }
 
-/* ── Tabs ── */
+/* â”€â”€ Tabs â”€â”€ */
 .tabs-container {
   display: flex;
   gap: 0;
@@ -1186,7 +1213,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
   font-weight: 500;
 }
 
-/* ── Journal entries ── */
+/* â”€â”€ Journal entries â”€â”€ */
 .notebook-period { margin-bottom: 2.5rem; }
 
 .period-title {
@@ -1274,7 +1301,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
   font-style: italic;
 }
 
-/* ── Empty state ── */
+/* â”€â”€ Empty state â”€â”€ */
 .empty-state {
   font-size: 0.9rem;
   color: var(--text-3);
@@ -1287,7 +1314,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
   text-decoration: none;
 }
 
-/* ── Chapter compile ── */
+/* â”€â”€ Chapter compile â”€â”€ */
 .chapter-compile {
   background: var(--bg-2);
   border: 1px solid var(--border);
@@ -1385,7 +1412,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
   white-space: pre-wrap;
 }
 
-/* ── Mirror / Patterns ── */
+/* â”€â”€ Mirror / Patterns â”€â”€ */
 .mirror-section {
   background: var(--bg-2);
   border: 1px solid var(--border);
@@ -1443,7 +1470,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
   margin-top: 0.625rem;
 }
 
-/* ── Silent saving ── */
+/* â”€â”€ Silent saving â”€â”€ */
 .silent-saving {
   display: flex;
   justify-content: center;
@@ -1460,9 +1487,9 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
   animation: breathe 2.5s ease-in-out infinite;
 }
 
-/* ─────────────────────────────────────────────────
+/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
    EDITOR
-───────────────────────────────────────────────── */
+â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 
 .editor-page {
   max-width: 680px;
@@ -1586,7 +1613,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
   opacity: 0.7;
 }
 
-/* ── Insight view ── */
+/* â”€â”€ Insight view â”€â”€ */
 .insight-view {
   max-width: 680px;
   margin: 0 auto;
@@ -1610,9 +1637,9 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
   border-top: 1px solid var(--border);
 }
 
-/* ─────────────────────────────────────────────────
+/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
    AUTH PAGE
-───────────────────────────────────────────────── */
+â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 
 .auth-split {
   min-height: 100vh;
@@ -1647,9 +1674,9 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
   pointer-events: none;
 }
 
-/* ─────────────────────────────────────────────────
+/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
    TYPOGRAPHY SETTINGS UI
-───────────────────────────────────────────────── */
+â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 /* Font picker grid */
 .font-picker {
   display: grid;
@@ -1863,9 +1890,9 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
 }
 .auth-switch-btn:hover { color: var(--text-1); }
 
-/* ─────────────────────────────────────────────────
-   LANDING (minimal fallback — kept for navigate)
-───────────────────────────────────────────────── */
+/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+   LANDING (minimal fallback â€” kept for navigate)
+â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 
 .landing-minimal {
   min-height: 100vh;
@@ -1877,9 +1904,9 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
   padding: 2rem;
 }
 
-/* ─────────────────────────────────────────────────
+/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
    SETTINGS & MANUSCRIPT VIEW
-───────────────────────────────────────────────── */
+â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 
 .settings-panel {
   max-width: 600px;
@@ -1984,9 +2011,9 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
   font-size: 0.9em;
 }
 
-/* ─────────────────────────────────────────────────
+/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
    PRINT STYLES
-───────────────────────────────────────────────── */
+â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 @media print {
   body {
     background: white;
@@ -2026,9 +2053,9 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
   }
 }
 
-/* ─────────────────────────────────────────────────
+/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
    BOOK BUILDER (MANUSCRIPT)
-───────────────────────────────────────────────── */
+â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .book-builder-split {
   display: grid;
   grid-template-columns: 320px 1fr;
@@ -2171,9 +2198,9 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
   color: var(--text-1);
 }
 
-/* ─────────────────────────────────────────────────
+/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
    DASHBOARD SPLIT-PANE
-───────────────────────────────────────────────── */
+â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .ds-split {
   display: flex;
   height: 100vh;
@@ -2374,6 +2401,412 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
   margin-bottom: 3rem;
 }
 
+/* Notion-style dashboard sidebar */
+.ds-split {
+  padding: 0;
+  background: var(--bg);
+}
+
+.ds-sidebar {
+  width: 260px;
+  min-width: 260px;
+  border-radius: 0;
+  background: var(--bg-2);
+  box-shadow: none;
+  border-right: 1px solid var(--border);
+  padding: 8px;
+  transition: width 180ms ease, min-width 180ms ease, transform 180ms ease;
+  font-family: var(--font-ui);
+}
+
+.ds-brand-link {
+  display: block;
+  padding: 7px 9px 9px;
+  margin-bottom: 4px;
+  color: var(--text-1);
+  text-decoration: none;
+  font-family: var(--font-head);
+  font-size: 1.12rem;
+  font-weight: 500;
+  line-height: 1.1;
+  letter-spacing: 0;
+  border-radius: var(--radius-sm);
+}
+
+.ds-brand-link:hover {
+  background: var(--bg-3);
+}
+
+.ds-split.sidebar-collapsed .ds-sidebar {
+  width: 52px;
+  min-width: 52px;
+}
+
+.ds-sidebar-top {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-bottom: 4px;
+  position: relative;
+}
+
+.ds-account-wrap {
+  min-width: 0;
+  flex: 1;
+  position: relative;
+}
+
+.ds-account-button,
+.ds-sidebar-toggle,
+.ds-tree-row,
+.ds-quick-find {
+  min-height: 30px;
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--text-2);
+}
+
+.ds-account-button,
+.ds-tree-row {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 5px 7px;
+  text-align: left;
+  cursor: pointer;
+  border-left: 3px solid transparent;
+  font-family: var(--font-ui);
+  font-size: 0.79rem;
+  line-height: 1.25;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+
+.ds-account-button:hover,
+.ds-tree-row:hover,
+.ds-quick-find:focus-within,
+.ds-quick-find:hover {
+  background: var(--bg-3);
+  color: var(--text-1);
+}
+
+.ds-tree-row.active {
+  background: var(--bg);
+  border-left-color: var(--gilt);
+  color: var(--text-1);
+  box-shadow: none;
+}
+
+.ds-tree-row:disabled {
+  opacity: 0.38;
+  cursor: default;
+}
+
+.ds-tree-row:disabled:hover {
+  background: transparent;
+  color: var(--text-2);
+}
+
+.ds-avatar {
+  width: 20px;
+  height: 20px;
+  flex: 0 0 20px;
+  border-radius: var(--radius-full);
+  background: var(--accent-2);
+  color: #fff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.68rem;
+  font-weight: 700;
+}
+
+.ds-account-email,
+.ds-row-label {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ds-account-menu {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  min-width: 190px;
+  padding: 6px;
+  z-index: 40;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-lg);
+}
+
+.ds-account-menu-email {
+  padding: 7px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 4px;
+  color: var(--text-3);
+  font-size: 0.76rem;
+  word-break: break-all;
+}
+
+.ds-account-menu button {
+  width: 100%;
+  padding: 7px;
+  border: 0;
+  border-radius: var(--radius-xs);
+  background: transparent;
+  color: var(--text-1);
+  text-align: left;
+  cursor: pointer;
+  font-family: var(--font-ui);
+}
+
+.ds-account-menu button:hover {
+  background: var(--bg-2);
+}
+
+.ds-sidebar-toggle {
+  width: 30px;
+  height: 30px;
+  flex: 0 0 30px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.ds-sidebar-toggle:hover {
+  background: var(--bg-3);
+  color: var(--text-1);
+}
+
+.ds-quick-find {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 0 10px;
+  margin-bottom: 6px;
+}
+
+.ds-quick-find input {
+  min-width: 0;
+  width: 100%;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: var(--text-1);
+  font-family: var(--font-ui);
+  font-size: 0.79rem;
+}
+
+.ds-quick-find input::placeholder {
+  color: var(--text-3);
+}
+
+.ds-tree-section {
+  min-height: 0;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.ds-tree-scroll {
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding-right: 2px;
+}
+
+.ds-tree-book {
+  margin-bottom: 1px;
+}
+
+.ds-book-row {
+  padding-left: 2px;
+}
+
+.ds-disclosure {
+  width: 16px;
+  height: 16px;
+  flex: 0 0 16px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-3);
+  border-radius: var(--radius-xs);
+  transition: transform 160ms ease, background 0.15s;
+}
+
+.ds-disclosure:hover {
+  background: var(--bg-4);
+  color: var(--text-1);
+}
+
+.ds-disclosure.open {
+  transform: rotate(90deg);
+}
+
+.ds-row-icon,
+.ds-tree-row > svg {
+  width: 16px;
+  height: 16px;
+  flex: 0 0 16px;
+  color: var(--text-3);
+}
+
+.ds-row-add {
+  width: 20px;
+  height: 20px;
+  margin-left: auto;
+  flex: 0 0 20px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-xs);
+  color: var(--text-3);
+  opacity: 0;
+  transition: opacity 0.15s, background 0.15s, color 0.15s;
+}
+
+.ds-book-row:hover .ds-row-add,
+.ds-row-add:focus-visible {
+  opacity: 1;
+}
+
+.ds-row-add:hover {
+  background: var(--bg-4);
+  color: var(--text-1);
+}
+
+.ds-entry-children {
+  margin: 1px 0 3px 20px;
+}
+
+.ds-entry-row {
+  min-height: 32px;
+  padding-left: 7px;
+}
+
+.ds-entry-row-text {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.ds-entry-row-date {
+  color: var(--text-3);
+  font-size: 0.66rem;
+  line-height: 1.1;
+  white-space: nowrap;
+}
+
+.ds-tree-empty {
+  margin: 2px 0 4px 30px;
+  color: var(--text-3);
+  font-size: 0.74rem;
+}
+
+.ds-new-journal {
+  flex: 0 0 auto;
+}
+
+.ds-bottom-nav {
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.ds-split.sidebar-collapsed .ds-account-email,
+.ds-split.sidebar-collapsed .ds-brand-link,
+.ds-split.sidebar-collapsed .ds-row-label,
+.ds-split.sidebar-collapsed .ds-entry-row-text,
+.ds-split.sidebar-collapsed .ds-quick-find input,
+.ds-split.sidebar-collapsed .ds-row-add,
+.ds-split.sidebar-collapsed .ds-disclosure {
+  display: none;
+}
+
+.ds-split.sidebar-collapsed .ds-sidebar {
+  padding: 8px 6px;
+}
+
+.ds-split.sidebar-collapsed .ds-sidebar-top {
+  flex-direction: column;
+}
+
+.ds-split.sidebar-collapsed .ds-account-button,
+.ds-split.sidebar-collapsed .ds-tree-row,
+.ds-split.sidebar-collapsed .ds-quick-find {
+  justify-content: center;
+  padding: 5px;
+  border-left-color: transparent;
+}
+
+.ds-split.sidebar-collapsed .ds-entry-children {
+  display: none;
+}
+
+.ds-main {
+  border-radius: 0;
+  box-shadow: none;
+}
+
+@media (max-width: 760px) {
+  .ds-split {
+    padding: 0;
+  }
+
+  .ds-sidebar {
+    position: fixed;
+    inset: 0 auto 0 0;
+    width: min(82vw, 292px);
+    min-width: min(82vw, 292px);
+    transform: translateX(-100%);
+    z-index: 60;
+    box-shadow: var(--shadow-lg);
+  }
+
+  .ds-split.sidebar-open .ds-sidebar {
+    transform: translateX(0);
+  }
+
+  .ds-split.sidebar-collapsed .ds-sidebar {
+    width: min(82vw, 292px);
+    min-width: min(82vw, 292px);
+  }
+
+  .ds-split.sidebar-collapsed.sidebar-open .ds-account-email,
+  .ds-split.sidebar-collapsed.sidebar-open .ds-row-label,
+  .ds-split.sidebar-collapsed.sidebar-open .ds-entry-row-text,
+  .ds-split.sidebar-collapsed.sidebar-open .ds-quick-find input,
+  .ds-split.sidebar-collapsed.sidebar-open .ds-disclosure {
+    display: initial;
+  }
+
+  .ds-split.sidebar-collapsed.sidebar-open .ds-account-button,
+  .ds-split.sidebar-collapsed.sidebar-open .ds-tree-row,
+  .ds-split.sidebar-collapsed.sidebar-open .ds-quick-find {
+    justify-content: flex-start;
+    padding: 5px 7px;
+  }
+
+  .ds-sidebar-scrim {
+    position: fixed;
+    inset: 0;
+    z-index: 50;
+    border: 0;
+    background: rgba(0, 0, 0, 0.28);
+  }
+}
+
 .ds-empty-state {
   display: flex;
   flex-direction: column;
@@ -2386,9 +2819,9 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
   font-size: 1.1rem;
 }
 
-/* ─────────────────────────────────────────────────
+/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
    RESPONSIVE
-───────────────────────────────────────────────── */
+â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 
 @media (max-width: 900px) {
   .lp-hero-layout {
@@ -2419,9 +2852,9 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
   .tabs-container { overflow-x: auto; }
 }
 
-/* ─────────────────────────────────────────────────
+/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
    LIBRARY GRID
-───────────────────────────────────────────────── */
+â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .library-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
@@ -2553,3 +2986,473 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
   font-weight: 300;
 }
 .book-card.new-book:hover .book-cover { box-shadow: none; border-color: var(--text-2); }
+
+/* ===== OVERVIEW PANE ===== */
+.overview-pane {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  padding: 1rem 0;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.overview-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.overview-greeting {
+  font-family: var(--font-head);
+  font-size: 1.8rem;
+  font-weight: 500;
+  color: var(--text-1);
+}
+
+.overview-metrics {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1rem;
+}
+
+.metric-card {
+  background: var(--bg-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.metric-icon {
+  font-size: 1.25rem;
+  color: var(--text-3);
+  margin-bottom: 0.5rem;
+}
+
+.metric-title {
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--text-2);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.metric-value {
+  font-size: 2rem;
+  font-family: var(--font-head);
+  font-weight: 500;
+  color: var(--text-1);
+  line-height: 1;
+}
+
+.metric-sub {
+  font-size: 0.75rem;
+  color: var(--text-3);
+  margin-top: auto;
+}
+
+.metric-pill {
+  display: inline-block;
+  padding: 2px 10px;
+  border-radius: 99px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.metric-pill.small {
+  padding: 1px 8px;
+  font-size: 0.7rem;
+}
+
+.mood-pill {
+  background: var(--success-deep);
+  color: var(--bg);
+}
+
+.pattern-pill {
+  background: var(--accent-muted);
+  color: var(--accent);
+  border: 1px solid var(--accent-border);
+}
+
+.mt-auto {
+  margin-top: auto;
+}
+
+.overview-grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 1.5rem;
+}
+
+.overview-section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+}
+
+.overview-section-header h3 {
+  font-size: 1rem;
+  font-family: var(--font-ui);
+  font-weight: 600;
+  color: var(--text-1);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.view-all {
+  font-size: 0.8rem;
+  color: var(--accent);
+  cursor: pointer;
+}
+
+.view-all:hover {
+  text-decoration: underline;
+}
+
+.recent-entries-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.recent-entry-card {
+  display: flex;
+  gap: 1.25rem;
+  background: var(--bg-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 1.25rem;
+  cursor: pointer;
+  transition: transform 0.15s, border-color 0.15s;
+}
+
+.recent-entry-card:hover {
+  border-color: var(--text-3);
+  transform: translateY(-1px);
+}
+
+.recent-date {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  min-width: 40px;
+}
+
+.recent-day {
+  font-size: 1.4rem;
+  font-weight: 600;
+  font-family: var(--font-head);
+  color: var(--text-1);
+  line-height: 1;
+}
+
+.recent-month {
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--text-3);
+  text-transform: uppercase;
+}
+
+.recent-details {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.recent-title {
+  font-size: 1.1rem;
+  font-weight: 500;
+  font-family: var(--font-head);
+  color: var(--text-1);
+  margin: 0;
+}
+
+.recent-snippet {
+  font-size: 0.85rem;
+  color: var(--text-2);
+  line-height: 1.4;
+  margin: 0;
+}
+
+.recent-pills {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.25rem;
+}
+
+.overview-sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.mood-mirror-card, .ai-insight-card {
+  background: var(--bg-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 1.25rem;
+}
+
+.mood-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.mood-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.mood-name {
+  font-size: 0.85rem;
+  color: var(--text-2);
+  width: 60px;
+}
+
+.mood-bar-container {
+  flex-grow: 1;
+  display: flex;
+  align-items: center;
+}
+
+.mood-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--success-deep);
+}
+
+.mood-count {
+  font-size: 0.85rem;
+  color: var(--text-3);
+  width: 20px;
+  text-align: right;
+}
+
+.insight-content {
+  background: var(--bg-3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xs);
+  padding: 1rem;
+}
+
+.insight-label {
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--accent);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.5rem;
+}
+
+.insight-text {
+  font-size: 0.85rem;
+  color: var(--text-1);
+  line-height: 1.5;
+}
+
+.overview-empty {
+  font-size: 0.85rem;
+  color: var(--text-3);
+  font-style: italic;
+}
+
+/* Sidebar Groups */
+.ds-sidebar-group {
+  margin-bottom: 1.5rem;
+}
+.ds-sidebar-label {
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--text-3);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 0 12px;
+  margin-bottom: 0.5rem;
+}
+.ds-sidebar-nav {
+  padding: 1rem 0;
+  flex-grow: 1;
+  overflow-y: auto;
+}
+.ds-sidebar-bottom-profile {
+  margin-top: auto;
+  padding: 12px;
+  border-top: 1px solid var(--border);
+}
+.ds-account-info {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  margin-left: 8px;
+}
+.ds-account-name {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-1);
+}
+.ds-sidebar-nav .ds-tree-row.active {
+  background: var(--bg-3);
+  color: var(--text-1);
+}
+
+
+/* ===== EDITOR REFINEMENTS ===== */
+.editor-chrome {
+  opacity: 1 !important; /* Override the old fade out */
+  margin-bottom: 3.5rem;
+  padding: 1rem 0;
+  border-bottom: 1px solid var(--border);
+}
+.editor-page {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+.watermark-date {
+  font-family: var(--font-ui);
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--text-3);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-style: normal;
+  margin-bottom: 1.5rem;
+}
+
+
+/* ===== DARK ACADEMIA JOURNAL VIEW REFINEMENTS ===== */
+.ds-split {
+  background: #211f1e;
+}
+.ds-sidebar {
+  background: #2a2725;
+  border-right: 1px solid #3c3835;
+  box-shadow: none;
+}
+.ds-brand-link {
+  color: #e0d5c1;
+  font-family: var(--font-head);
+  font-size: 1.5rem;
+}
+.ds-sidebar-nav .ds-tree-row {
+  color: #a49c90;
+  border-radius: 6px;
+  padding: 8px 16px;
+  margin: 0 0.5rem;
+}
+.ds-sidebar-nav .ds-tree-row.active {
+  background: #3c3835;
+  color: #e0d5c1;
+  border-left: none;
+  box-shadow: none;
+}
+.ds-divider {
+  background: #3c3835;
+  margin: 1rem 1.25rem;
+  height: 1px;
+}
+.ds-entry-date {
+  font-family: var(--font-head);
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  color: #8b7d6a;
+  letter-spacing: 0.1em;
+  padding: 0 1.25rem;
+  margin-bottom: 0.5rem;
+}
+.ds-entry-item {
+  color: #a49c90;
+  border-radius: 6px;
+  padding: 6px 1.25rem;
+  margin: 0 0.5rem;
+  width: calc(100% - 1rem);
+  text-align: left;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.ds-entry-item.active {
+  background: #3c3835;
+  color: #e0d5c1;
+}
+.ds-entry-preview {
+  font-size: 0.95rem;
+  font-family: var(--font-body);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.ds-entry-date-large {
+  font-family: var(--font-head);
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  color: #8b7d6a;
+  letter-spacing: 0.1em;
+  margin-bottom: 2rem;
+}
+.ds-entry-text {
+  font-family: var(--font-body);
+  font-size: 1.25rem;
+  line-height: 1.6;
+  color: #e0d5c1;
+  margin-bottom: 3rem;
+  white-space: pre-wrap;
+}
+.observer-note-card {
+  background: #312c26;
+  border: 1px solid #4a4135;
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+}
+.observer-note-label {
+  font-family: var(--font-head);
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  color: #a79471;
+  letter-spacing: 0.1em;
+  margin-bottom: 0.75rem;
+}
+.observer-note-content {
+  font-family: var(--font-body);
+  font-size: 1.05rem;
+  line-height: 1.5;
+  color: #d0b89a;
+}
+.past-echo-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+.past-echo-block {
+  border-left: 2px solid #5a5349;
+  padding-left: 1.25rem;
+}
+.past-echo-label {
+  font-family: var(--font-head);
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  color: #8b7d6a;
+  letter-spacing: 0.1em;
+  margin-bottom: 0.5rem;
+}
+.past-echo-text {
+  font-family: var(--font-body);
+  font-size: 1.05rem;
+  font-style: italic;
+  color: #a49c90;
+  line-height: 1.5;
+}
+
